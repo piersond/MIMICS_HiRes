@@ -1,0 +1,69 @@
+library(tidyverse)
+library(grid)
+library(gridExtra)
+library(scales) #<-- for plot colors
+library(ggpubr)
+library(ggthemes)
+library(ggplot2)
+
+#library(devtools)
+#devtools::install_github('Mikata-Project/ggthemr')
+library(ggthemr)
+### See plot themes @ https://github.com/Mikata-Project/ggthemr#installation
+
+setwd("C:/github/MIMICS_HiRes/MCMC-2")
+
+### Load all MCMC output csv files from directory
+filenames <- list.files(path="Output/",pattern=".*csv")
+
+## Create list of data frame names without the ".csv" part 
+names <-paste0("MCMC", seq(1,length(filenames)))
+
+### Load all files
+for(i in 1:length(names)){
+  data_in <- read.csv(paste0("Output/",filenames[i]), as.is=T)
+  data_in$ID = paste0("Run ", as.character(i))
+  #assign(names[i], MC_data)
+  if(i == 1) {
+    MCMC <- data_in  
+  } else {
+    MCMC <- rbind(MCMC, data_in)
+  }
+}
+
+### Filter MCMC data to only include steps that improved RMSE
+MCMC <- MCMC %>% filter(improve == 1)
+
+### Create plot of parameter MCMC walks
+
+colourCount = length(names)
+
+pRMSE <- ggplot(MCMC, aes(x=iter, y=RMSE, colour=factor(ID))) + geom_line(alpha=0.5) + geom_point(size=2, alpha=0.5) + geom_line(size=1) + theme_minimal() + 
+  scale_color_manual(values = colorRampPalette(solarized_pal()(8))(colourCount),guide = guide_legend(nrow=2))
+pr2 <- ggplot(MCMC, aes(x=iter, y=r2, color=ID)) + geom_line(alpha=0.5) + geom_point(size=2, alpha=0.5)  + geom_line(size=1) + theme_minimal() + 
+  scale_color_manual(values = colorRampPalette(solarized_pal()(8))(colourCount),guide = guide_legend(nrow=2))
+pTau_x <- ggplot(MCMC, aes(x=iter, y=Tau_x, color=ID)) + geom_line(alpha=0.5) + geom_point(size=2, alpha=0.5)  + geom_line(size=1) + theme_minimal() + 
+  scale_color_manual(values = colorRampPalette(solarized_pal()(8))(colourCount),guide = guide_legend(nrow=2))
+pCUE_x <-ggplot(MCMC, aes(x=iter, y=CUE_x, color=ID)) + geom_line(alpha=0.5) + geom_point(size=2, alpha=0.5)  + geom_line(size=1) + theme_minimal() + 
+  scale_color_manual(values = colorRampPalette(solarized_pal()(8))(colourCount),guide = guide_legend(nrow=2))
+pDesorb_x <- ggplot(MCMC, aes(x=iter, y=desorb_x, color=ID)) + geom_line(alpha=0.5) + geom_point(size=2, alpha=0.5)  + geom_line(size=1) + theme_minimal() + 
+  scale_color_manual(values = colorRampPalette(solarized_pal()(8))(colourCount),guide = guide_legend(nrow=2))
+pFPHYS_x <- ggplot(MCMC, aes(x=iter, y=fPHYS_x, color=ID)) + geom_line(alpha=0.5) + geom_point(size=2, alpha=0.5)  + geom_line(size=1) + theme_minimal() + 
+  scale_color_manual(values = colorRampPalette(solarized_pal()(8))(colourCount),guide = guide_legend(nrow=2))
+pVslope_x <- ggplot(MCMC, aes(x=iter, y=Vslope_x, color=ID)) + geom_line(alpha=0.5) + geom_point(size=2, alpha=0.5)  + geom_line(size=1) + theme_minimal() + 
+  scale_color_manual(values = colorRampPalette(solarized_pal()(8))(colourCount),guide = guide_legend(nrow=2))
+pVint_x <- ggplot(MCMC, aes(x=iter, y=Vint_x, color=ID)) + geom_line(alpha=0.5) + geom_point(size=2, alpha=0.5)  + geom_line(size=1) + theme_minimal() + 
+  scale_color_manual(values = colorRampPalette(solarized_pal()(8))(colourCount),guide = guide_legend(nrow=2))
+pKslope_x <- ggplot(MCMC, aes(x=iter, y=Kslope_x, color=ID)) + geom_line(alpha=0.5) + geom_point(size=2, alpha=0.5)  + geom_line(size=1) + theme_minimal() + 
+  scale_color_manual(values = colorRampPalette(solarized_pal()(8))(colourCount),guide = guide_legend(nrow=2))
+pKint_x <- ggplot(MCMC, aes(x=iter, y=Kint_x, color=ID)) + geom_line(alpha=0.5) + geom_point(size=2, alpha=0.5)  + geom_line(size=1) + theme_minimal() + 
+  scale_color_manual(values = colorRampPalette(solarized_pal()(8))(colourCount),guide = guide_legend(nrow=2))
+
+# Put all plotsa together in a matrix
+mplot <- ggarrange(pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKslope_x, pRMSE, pr2, ncol=3, nrow=3, common.legend = TRUE, legend="bottom")
+mplot
+
+### Save matrix plot
+#ggsave(plot=mplot, filename = "MCMC_results_matrix.jpeg", width = 14, height = 8 , dpi = 1000)
+
+           
