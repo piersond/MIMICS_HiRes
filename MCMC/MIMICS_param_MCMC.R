@@ -5,9 +5,6 @@
 # For local run
 #setwd("C:/github/MIMICS_HiRes")
 
-# For ISU HPC run
-#setwd('home/derekpierson/MIMICS_HiRes')
-
 ########################################
 # Load forcing data
 ########################################
@@ -183,5 +180,5 @@ nbrOfWorkers()
 #######################
 # Export MCMC run data
 #######################
-write.csv(MCMC_out, paste0("MCMC-2/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs), ".csv"))
+write.csv(MCMC_out, paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs), ".csv"))
 

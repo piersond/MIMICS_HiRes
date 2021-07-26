@@ -1,9 +1,9 @@
 ### MIMICS MC
 
-#setwd("C:/local_temp/ISU_HPC/071921")
+#setwd("C:/github/MIMICS_HiRes")
 
 # Bring in MIMICS ftn
-source("param_bruteForcing2.R")
+source("MIMICS_ftns/MIMICS_repeat_base.R")
 
 #################################################
 
@@ -55,8 +55,7 @@ BruteMIM <- BruteMIM %>% left_join(rand_params)
 ##########################################
 # Save MC output data
 ##########################################
-#write.csv(BruteMIM, paste0("MC_output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "BruteMIM-", as.character(MIM_runs), ".csv"))
-saveRDS(BruteMIM, paste0("MC_output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "BruteMIM-", as.character(MIM_runs), ".rds"))
+saveRDS(BruteMIM, paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "BruteMIM-", as.character(MIM_runs), ".rds"))
 
 
 # Close R

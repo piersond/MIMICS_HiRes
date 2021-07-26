@@ -6,12 +6,7 @@ library(ggpubr)
 library(ggthemes)
 library(ggplot2)
 
-#library(devtools)
-#devtools::install_github('Mikata-Project/ggthemr')
-library(ggthemr)
-### See plot themes @ https://github.com/Mikata-Project/ggthemr#installation
-
-setwd("C:/github/MIMICS_HiRes/MCMC-2")
+setwd("C:/github/MIMICS_HiRes/MCMC")
 
 ### Load all MCMC output csv files from directory
 filenames <- list.files(path="Output/",pattern=".*csv")
@@ -64,6 +59,6 @@ mplot <- ggarrange(pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKsl
 mplot
 
 ### Save matrix plot
-#ggsave(plot=mplot, filename = "MCMC_results_matrix.jpeg", width = 14, height = 8 , dpi = 1000)
+ggsave(plot=mplot, filename = paste0("Post_MCMC_Analysis/Plots/MCMC_results_matrix", format(Sys.time(), "%Y%m%d_%H%M%S_"),".jpeg"), width = 14, height = 8 , dpi = 1000)
 
            
