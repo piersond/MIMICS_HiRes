@@ -1,11 +1,11 @@
 ### MIMICS MC
 
-#setwd("C:/github/MIMICS_HiRes")
+setwd("C:/github/MIMICS_HiRes")
 
 ########################################
 # Load forcing data
 ########################################
-data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
+data <- read.csv("RCrk_Modelling_Data/LTER_SITE_1.csv", as.is=T)
 
 
 ########################################
@@ -19,7 +19,7 @@ source("MIMICS_ftns/MIMICS_repeat_base.R")
 ####################################
 
 # Set desired number of random parameter runs
-MIM_runs <- 10
+MIM_runs <- 1000
 
 ### Create random parameter dataframe
 ## Parameter range informed by range observed over 10+ MCMC analysis results
@@ -63,7 +63,7 @@ MC_MIMICS <- MC_MIMICS %>% left_join(rand_params)
 ##########################################
 # Save MC output data
 ##########################################
-saveRDS(MC_MIMICS, paste0("MC/Output/", "MC_MIMICS_data-r", as.character(MIM_runs), "_", format(Sys.time(), "%Y%m%d_%H%M%S"),  ".rds"))
+saveRDS(MC_MIMICS, paste0("MC/Output/", "LIDET_MC_data-r", as.character(MIM_runs), "_", format(Sys.time(), "%Y%m%d_%H%M%S"),  ".rds"))
 
 
 
