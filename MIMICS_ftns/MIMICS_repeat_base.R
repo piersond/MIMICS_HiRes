@@ -231,7 +231,7 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
 #####################
 
 # bring in forcing data
-# data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
+# data <- read.csv("RCrk_Modelling_Data/LTER_SITE_1.csv", as.is=T)
 # 
 # test_params <- data.frame(Vslope_x = 1.5382,
 #                           Vint_x = 1.8601,

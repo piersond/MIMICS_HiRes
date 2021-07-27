@@ -1,6 +1,6 @@
 
 ## Set working drive
-#setwd("C:/github/MIMICS_HiRes")
+setwd("C:/github/MIMICS_HiRes")
 
 #Libraries
 library(rootSolve)
@@ -68,24 +68,24 @@ fPHYS_K <- c(0.2, 0.8)
 fCHEM_r <- c(0.1, -3, 1)
 fCHEM_K <- c(0.3, -3, 1)
 fSOM_p  <- c(0.000015, -1.5)
-PHYS_scalar <- c(2, -2)
+PHYS_scalar <- c(2, -2, NA, NA, NA, NA)
 FI      <- c(0.05, 0.05)
 fmet_p <- c(1, 0.85, 0.013)
-depth <- 30
+depth <- 30 ###
 h2y        <- 24*365
 MICROtoECO <- depth * 1e4 * 1e-3         # mgC/cm3 to g/m2
 
 ########################################
 # Apply parameter multipliers
 ########################################
-Vslope = Vslope * 1.5382
-Vint = Vint * 1.8601
-Kslope = Kslope * 0.8204
-Kint = Kint * 1.7086
-CUE = CUE * 0.9113
-Tau_MULT = 0.8446
-desorb_MULT = 1.7790
-fPHYS_MULT = 0.9690
+Vslope = Vslope * 1
+Vint = Vint * 1
+Kslope = Kslope * 1
+Kint = Kint * 1
+CUE = CUE * 1
+Tau_MULT = 1
+desorb_MULT = 1
+fPHYS_MULT = 1
 
 ###########################################
 # MIMICS single point function
@@ -94,45 +94,51 @@ MIMICS1 <- function(df){
 
   #run notes
   note <- ""
-
+  print(df$Site)
+  
+  
   ###set LIGNIN:N to fMET value
   lig_N <- df$lig_N
-  fMET <- fmet_p[1] * (fmet_p[2] - fmet_p[3] * lig_N) 
-   
+  #fMET <- fmet_p[1] * (fmet_p[2] - fmet_p[3] * lig_N) 
+  #LTER SHORTCUT FMET
+  fMET <- 0.3846423
+  
   #if lignin:N data missing, use specified value
-  if(lig_N == 0) {
-    fMET <- 0.6979
+ # if(lig_N == 0) {
+ #    fMET <- 0.6979
     #print("Using default fMET")
-    } #<--sagebrush litter 
+#    } #<--sagebrush litter 
    
   ###set ANPP value
-  ANPP       <- df$pGPP+400
+  ANPP       <- (df$pGPP+400)/2
+  print(ANPP)
   #prevent negative ANPP
-  if(ANPP < 1){
-    ANPP <- 1.19999
-    note <- "Fixing ANPP < 1"
-  }
+ # if(ANPP < 1){
+ #   ANPP <- 1.19999
+#    note <- "Fixing ANPP < 1"
+#  }
   
   ### Set CLAY value
   fCLAY      <- df$CLAY/100
   # Prevent clay < 3%
-  if(fCLAY < 0.02) {
-    fCLAY <- 0.02
+ # if(fCLAY < 0.02) {
+#    fCLAY <- 0.02
     #print("Low clay value set to 2%")
-  }
+#  }
   
   ### Set TSOI value
   TSOI       <- df$TSOI
   
   # Calc litter input rate
-  EST_LIT <- (ANPP / (365*24)) * 1e3 / 1e4         # gC/m2/h (from gC/m2/y) then mgC/cm2/h(from gC/m2/h) 
+  EST_LIT <- (ANPP / (365*24)) * 1e3 / 1e4
+  print(EST_LIT)# gC/m2/h (from gC/m2/y) then mgC/cm2/h(from gC/m2/h) 
   
   # ------------ caclulate parameters ---------------
   Vmax     <- exp(TSOI * Vslope + Vint) * aV 
   Km       <- exp(TSOI * Kslope + Kint) * aK
   
   #ANPP strongly correlated with MAP
-  Tau_MOD1 <- sqrt(ANPP)/Tau_MOD[1]         
+  Tau_MOD1 <- sqrt(ANPP/Tau_MOD[1])         
   Tau_MOD2 <- Tau_MOD[4]                        
   Tau_MOD1[Tau_MOD1 < Tau_MOD[2]] <- Tau_MOD[2]
   Tau_MOD1[Tau_MOD1 > Tau_MOD[3]] <- Tau_MOD[3] 
@@ -149,6 +155,8 @@ MIMICS1 <- function(df){
   
   desorb <- desorb * desorb_MULT
   fPHYS <- fPHYS * fPHYS_MULT
+  print(desorb)
+  
   
   pSCALAR  <- PHYS_scalar[1] * exp(PHYS_scalar[2]*(sqrt(fCLAY)))  #Scalar for texture effects on SOMp
   v_MOD    <- vMOD  
@@ -203,6 +211,7 @@ MIMICS1 <- function(df){
   #test  <- stode(y = Ty, time = 1e6, fun = RXEQ, parms = Tpars, positive = TRUE)
   test  <- stode_jitter(stode_y = Ty, stode_time = 1e6, stode_fun = RXEQ, stode_parms = Tpars, stode_pos = TRUE)
   
+  
   ###Return MIMICS output 
   #table[i,2:8] <- as.numeric(test[[1]])
   MIMLIT    <- (test[[1]][[1]]+test[[1]][[2]])  * depth *1e4 / 1e6 #convert kgC/m2 from mgC/cm3 (0-30 cm) 
@@ -233,22 +242,22 @@ MIMICS1 <- function(df){
                        DEBUG = note
                       )
   #Reset global parameters from last run
-  .GlobalEnv$VMAX <- NA
-  .GlobalEnv$KM <- NA
-  .GlobalEnv$fPHYS <- NA
-  .GlobalEnv$fCHEM <- NA
-  .GlobalEnv$fAVAI <- NA
-  .GlobalEnv$I <- NA
-  .GlobalEnv$tau <- NA
-  .GlobalEnv$LITmin <- NA
-  .GlobalEnv$SOMmin <- NA
-  .GlobalEnv$MICtrn <- NA
-  .GlobalEnv$desorb <- NA
-  .GlobalEnv$DEsorb <- NA
-  .GlobalEnv$OXIDAT <- NA
+  # .GlobalEnv$VMAX <- NA
+  # .GlobalEnv$KM <- NA
+  # .GlobalEnv$fPHYS <- NA
+  # .GlobalEnv$fCHEM <- NA
+  # .GlobalEnv$fAVAI <- NA
+  # .GlobalEnv$I <- NA
+  # .GlobalEnv$tau <- NA
+  # .GlobalEnv$LITmin <- NA
+  # .GlobalEnv$SOMmin <- NA
+  # .GlobalEnv$MICtrn <- NA
+  # .GlobalEnv$desorb <- NA
+  # .GlobalEnv$DEsorb <- NA
+  # .GlobalEnv$OXIDAT <- NA
 
   #remove global variables set for stode ftn
-  rm(I, VMAX, KM, fPHYS, fCHEM, fAVAI, tau, LITmin, SOMmin, MICtrn, desorb, DEsorb, OXIDAT)
+  #rm(I, VMAX, KM, fPHYS, fCHEM, fAVAI, tau, LITmin, SOMmin, MICtrn, desorb, DEsorb, OXIDAT)
   
   return(MIMout)
   }
@@ -270,8 +279,31 @@ MIMICS1 <- function(df){
 # 
 # ### full forcing dataset run
 # ##############################################
-# data <- data <- read.csv("RCrk_Modelling_Data/RCrk_forcing_all.csv", as.is=T)
-# MIMrun <- data %>% split(1:nrow(data)) %>% map(~ MIMICS1(df=.)) %>% bind_rows()
-# MIMrun <- data %>% cbind(MIMrun %>% select(-Site, -TSOI))
+data <- data <- read.csv("RCrk_Modelling_Data/LTER_SITE_1.csv", as.is=T)
 
+MIMout_single <- MIMICS1(data[1,])
+
+MIMrun <- data %>% split(1:nrow(data)) %>% map(~ MIMICS1(df=.)) %>% bind_rows()
+MIMrun <- data %>% cbind(MIMrun %>% select(-Site, -TSOI))
+
+
+### Plot SOC vs MIMSOC
+################################################
+library(ggplot2)
+library(Metrics)
+
+plot_data <- MIMrun
+
+r2_test <- cor.test(MIMrun$SOC, MIMrun$MIMSOC)
+r_val <- round(as.numeric(unlist(r2_test ['estimate'])),2)
+lb2 <- paste("R^2 == ", r_val)
+
+rmse <- round(rmse(MIMrun$SOC, MIMrun$MIMSOC),2) 
+
+ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=ANPP)) + 
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed")+
+  geom_point(size=4, alpha=0.8) + 
+  geom_text(aes(label=paste0(Site)),hjust=-0.2, vjust=0.2) +
+  annotate("text", label = lb2, x = 4, y = 8.5, size = 6, colour = "black", parse=T) + 
+  annotate("text", label = paste0("RMSE = ", rmse), x = 4, y = 7.4, size = 6, colour = "black") 
 
