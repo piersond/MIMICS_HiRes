@@ -2,27 +2,35 @@
 
 #setwd("C:/github/MIMICS_HiRes")
 
-# Bring in MIMICS ftn
+########################################
+# Load forcing data
+########################################
+data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
+
+
+########################################
+# Load MIMICS data and ftns from Brute Forcing script
+########################################
 source("MIMICS_ftns/MIMICS_repeat_base.R")
 
-#################################################
 
 ####################################
-# Using the brute force MIMICS ftn
+# Use the brute force MIMICS ftn
 ####################################
 
 # Set desired number of random parameter runs
-MIM_runs <- 100
+MIM_runs <- 10
 
-#Create random parameter dataframe
-rand_params <- data.frame(Vslope_x = runif(MIM_runs, 0.8, 3),  #Start w/ (0.8,3.0)
-                          Vint_x = runif(MIM_runs, 0.8, 3),  #Start w/ (0.8, 3)
-                          Kslope_x = runif(MIM_runs, 0.8, 3),  #Start w/ (0.8, 3)
-                          Kint_x = runif(MIM_runs, 0.8, 3),  #Start w/ (0.8, 3)
-                          Tau_x = runif(MIM_runs, 0.3, 2),  #Start w/ (0.3, 2)
-                          CUE_x = runif(MIM_runs, 0.3, 2),  #Start w/ (0.3, 2)
-                          desorb_x = runif(MIM_runs, 0.3, 3),  #start w/ (0.3, 3)
-                          fPHYS_x = runif(MIM_runs, 0.3, 3)  #Start w/ (0.3, 3)
+### Create random parameter dataframe
+## Parameter range informed by range observed over 10+ MCMC analysis results
+rand_params <- data.frame(Vslope_x = runif(MIM_runs, 1.5, 4),  
+                          Vint_x = runif(MIM_runs, 0.1, 1.5),  
+                          Kslope_x = runif(MIM_runs, 0.8, 3.3),  
+                          Kint_x = runif(MIM_runs, 0.8, 3.3),  
+                          Tau_x = runif(MIM_runs, 0.3, 3),  
+                          CUE_x = runif(MIM_runs, 0.5, 1.5),  
+                          desorb_x = runif(MIM_runs, 0.3, 3),  
+                          fPHYS_x = runif(MIM_runs, 1, 3)  
                           )
 
 rand_params$run_num <- seq(1,MIM_runs,1)
@@ -37,7 +45,7 @@ print(paste0("Starting ", MIM_runs, " runs"))
 print(paste0("Start time: ", Sys.time()))
 
 start_time <- Sys.time()
-BruteMIM <- rand_params %>% split(1:nrow(rand_params)) %>% future_map(~ MIMbrute(forcing_df = data, rparams = .), .progress=TRUE) %>% bind_rows()
+MC_MIMICS <- rand_params %>% split(1:nrow(rand_params)) %>% future_map(~ MIMbrute(forcing_df = data, rparams = ., output_type = "all"), .progress=TRUE) %>% bind_rows()
 print(paste0("Task time: ", Sys.time() - start_time))
 
 # Release CPU cores
@@ -49,16 +57,14 @@ gc()
 
 
 ## Join parameters to MIMICS output table
-BruteMIM <- BruteMIM %>% left_join(rand_params)
+MC_MIMICS <- MC_MIMICS %>% left_join(rand_params)
 
 
 ##########################################
 # Save MC output data
 ##########################################
-saveRDS(BruteMIM, paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "BruteMIM-", as.character(MIM_runs), ".rds"))
+saveRDS(MC_MIMICS, paste0("MC/Output/", "MC_MIMICS_data-r", as.character(MIM_runs), "_", format(Sys.time(), "%Y%m%d_%H%M%S_"),  ".rds"))
 
 
-# Close R
-#quit(save="no")
 
 

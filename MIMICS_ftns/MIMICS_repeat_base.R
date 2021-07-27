@@ -78,6 +78,9 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
     #Optional combine MIMout with forcing data
     MIMrun <- forcing_df %>% cbind(MIMrun %>% select(MIMSOC, MIMMIC, MIMLIT, MIM_CO, LITm, LITs, MICr, MICK, SOMa, SOMc, SOMp, JITn, DEBUG))
     
+    #add run number
+    MIMrun$run_num <- rparams$run_num[1]
+    
     
     ############################################
     # Collect summary stats from MIMrun
@@ -197,6 +200,9 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
       desorb_x = rparams$desorb_x[1],
       fPHYS_x = rparams$fPHYS_x[1],
       
+      #run info
+      run_num = rparams$run_num[1],
+      
       #debug info
       jitr_mn = mean(as.numeric(MIMrun$JITn), na.rm = T)
     )
@@ -225,7 +231,7 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
 #####################
 
 # bring in forcing data
-# data <- read.csv("RCrk_Modelling_Data/RCrk_forcing_all.csv", as.is=T)
+# data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
 # 
 # test_params <- data.frame(Vslope_x = 1.5382,
 #                           Vint_x = 1.8601,
@@ -234,8 +240,9 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
 #                           Tau_x = 0.8446,
 #                           CUE_x = 0.9113,
 #                           desorb_x = 1.7790,
-#                           fPHYS_x = 0.9690)
+#                           fPHYS_x = 0.9690,
+#                           run_num = 1)
 # 
 # test_output_summary <- MIMbrute(forcing_df = data, rparams = test_params, output_type = "summary")
-# test_output2_all <- MIMbrute(forcing_df = data, rparams = test_params, output_type = "all")
+# test_output_all <- MIMbrute(forcing_df = data, rparams = test_params, output_type = "all")
 
