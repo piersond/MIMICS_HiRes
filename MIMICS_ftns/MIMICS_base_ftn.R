@@ -84,14 +84,14 @@ fPHYS_MULT = 1
 ########################################
 # Apply parameter multipliers
 ########################################
-# Vslope = Vslope * 1.693578
-# Vint = Vint * 0.633318
-# Kslope = Kslope * 1.782366
-# Kint = Kint * 0.3609913
-# CUE = CUE * 1
-# Tau_MULT = 1
-# desorb_MULT = 2.3635554
-# fPHYS_MULT = 2.0716163
+Vslope = Vslope * 1.693578
+Vint = Vint * 0.633318
+Kslope = Kslope * 1.782366
+Kint = Kint * 0.3609913
+CUE = CUE * 1
+Tau_MULT = 1
+desorb_MULT = 2.3635554
+fPHYS_MULT = 2.0716163
 
 ###########################################
 # MIMICS single point function
@@ -265,6 +265,10 @@ MIMICS1 <- function(df){
   #remove global variables set for stode ftn
   #rm(I, VMAX, KM, fPHYS, fCHEM, fAVAI, tau, LITmin, SOMmin, MICtrn, desorb, DEsorb, OXIDAT)
   
+  #DEBUG printouts
+  print(desorb)
+  
+  
   return(MIMout)
   }
 
@@ -313,4 +317,19 @@ ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=ANPP)) +
   annotate("text", label = lb2, x = 2, y = 8.5, size = 6, colour = "black", parse=T) + 
   annotate("text", label = paste0("RMSE = ", rmse), x = 2, y = 7.4, size = 6, colour = "black") +
   ylim(0,10) + xlim(0,10)
+
+
+
+
+# df2 <- read.csv("desorb_comp.csv")
+# colnames(df2)[1] <- "Site"
+# df2$Site <- with(df2, reorder(Site, Clay))
+# 
+# ggplot(df2, aes(x=Site, y=desorb_y, color=pset)) + geom_point(size=4) + 
+#   geom_point(aes(x=Site, y=Clay/100, color="Clay"), pch=16, alpha=0.4, size=2) +
+#   scale_color_manual(values=c("black", "red", "blue")) +
+#   theme_bw() +
+#   ggtitle("LTER Site MIMICS desorb rates") +
+#   ylab("desorb (yr-1)") +
+#   xlab("LTER Site")
 
