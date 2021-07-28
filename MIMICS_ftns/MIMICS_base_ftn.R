@@ -132,7 +132,7 @@ MIMICS1 <- function(df){
   Km       <- exp(TSOI * Kslope + Kint) * aK
   
   #ANPP strongly correlated with MAP
-  Tau_MOD1 <- sqrt(ANPP)/Tau_MOD[1]         
+  Tau_MOD1 <- sqrt(ANPP/Tau_MOD[1])         
   Tau_MOD2 <- Tau_MOD[4]                        
   Tau_MOD1[Tau_MOD1 < Tau_MOD[2]] <- Tau_MOD[2]
   Tau_MOD1[Tau_MOD1 > Tau_MOD[3]] <- Tau_MOD[3] 
