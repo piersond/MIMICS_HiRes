@@ -19,7 +19,7 @@ source("MIMICS_ftns/MIMICS_repeat_base.R")
 ####################################
 
 # Set desired number of random parameter runs
-MIM_runs <- 10
+MIM_runs <- 100000
 
 ### Create random parameter dataframe
 ## Parameter range informed by range observed over 10+ MCMC analysis results

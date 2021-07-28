@@ -8,7 +8,7 @@ source("Figures/plot_theme.R")
 ####################
 # Load MC data
 ####################
-MCdata <- readRDS("MC/Output/MC_MIMICS_data-r1000_20210727_131918_.rds")
+MCdata <- readRDS("MC/Output/MC_MIMICS_data-r10000_20210728_100820_.rds")
 
 
 ##########################################################
@@ -21,19 +21,19 @@ stats <- MCdata %>% group_by(run_num) %>% summarize(RMSE = rmse(SOC, MIMSOC),
 stats$RMSE <- round(stats$RMSE,3)
 
 #Calc correlations
-corr_data <- data.frame(run_num=NA, r2 = NA)
-
-for(i in 1:length(unique(MCdata$run_num))) {
-  df <- MCdata %>% filter(run_num == i)
-  r2_test <- cor.test(df$SOC, df$MIMSOC)
-  r_val <- round(as.numeric(unlist(r2_test ['estimate'])),3)
-  corr_data <- rbind(corr_data, data.frame(run_num=i, r2 = r_val))
-}
-
-stats <- stats %>% left_join(corr_data)
+# corr_data <- data.frame(run_num=NA, r2 = NA)
+# 
+# for(i in 1:length(unique(MCdata$run_num))) {
+#   df <- MCdata %>% filter(run_num == i)
+#   r2_test <- cor.test(df$SOC, df$MIMSOC)
+#   r_val <- round(as.numeric(unlist(r2_test ['estimate'])),3)
+#   corr_data <- rbind(corr_data, data.frame(run_num=i, r2 = r_val))
+# }
+# 
+# stats <- stats %>% left_join(corr_data)
 
 ### Filter by MIMMIC and LIT
-best_fit <- stats %>% filter(MICtoSOC < 0.8) %>%
+best_fit <- stats %>% filter(MICtoSOC < 0.08) %>%
                         filter(MICtoSOC > 0.05) %>%
                         filter(LITtoSOC > 0.01)
 
@@ -41,7 +41,7 @@ best_fit <- stats %>% filter(MICtoSOC < 0.8) %>%
 #Plot SOC vs MIMSOC
 ################################################################################
 ### Based on stats in "best-fit" dataframe, plot data for specific run number
-run_to_plot <- 30
+run_to_plot <- 4568
 ################################################################################
 
 plot_data <- MCdata %>% filter(run_num == run_to_plot)

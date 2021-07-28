@@ -112,7 +112,7 @@ MIMICS1 <- function(df){
     } #<--sagebrush litter 
    
   ###set ANPP value
-  ANPP       <- (df$pGPP+400)/2
+  ANPP       <- (df$pGPP+400)/2  
   #prevent negative ANPP
   if(ANPP < 1){
     ANPP <- 1.19999

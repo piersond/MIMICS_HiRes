@@ -70,7 +70,8 @@ curr_p <- data.frame(Vslope_x = 1,
                      Tau_x = 1,
                      CUE_x = 1,
                      desorb_x = 1,
-                     fPHYS_x = 1)
+                     fPHYS_x = 1,
+                     run_num=NA)
 
 # Set initial cost value (RMSE value to improve from)
 curr_cost <- 3.5
