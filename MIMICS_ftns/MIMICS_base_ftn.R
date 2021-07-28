@@ -75,17 +75,23 @@ depth <- 30
 h2y        <- 24*365
 MICROtoECO <- depth * 1e4 * 1e-3         # mgC/cm3 to g/m2
 
+# Set default multipiers to 1
+Tau_MULT = 1
+desorb_MULT = 1
+fPHYS_MULT = 1
+
+
 ########################################
 # Apply parameter multipliers
 ########################################
-Vslope = Vslope * 1.5382
-Vint = Vint * 1.8601
-Kslope = Kslope * 0.8204
-Kint = Kint * 1.7086
-CUE = CUE * 0.9113
-Tau_MULT = 0.8446
-desorb_MULT = 1.7790
-fPHYS_MULT = 0.9690
+# Vslope = Vslope * 1.5382
+# Vint = Vint * 1.8601
+# Kslope = Kslope * 0.8204
+# Kint = Kint * 1.7086
+# CUE = CUE * 0.9113
+# Tau_MULT = 0.8446
+# desorb_MULT = 1.7790
+# fPHYS_MULT = 0.9690
 
 ###########################################
 # MIMICS single point function
@@ -106,7 +112,7 @@ MIMICS1 <- function(df){
     } #<--sagebrush litter 
    
   ###set ANPP value
-  ANPP       <- df$pGPP+400
+  ANPP       <- (df$pGPP+400)/2
   #prevent negative ANPP
   if(ANPP < 1){
     ANPP <- 1.19999
@@ -270,8 +276,26 @@ MIMICS1 <- function(df){
 # 
 # ### full forcing dataset run
 # ##############################################
-# data <- data <- read.csv("RCrk_Modelling_Data/RCrk_forcing_all.csv", as.is=T)
+# data <- data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
 # MIMrun <- data %>% split(1:nrow(data)) %>% map(~ MIMICS1(df=.)) %>% bind_rows()
 # MIMrun <- data %>% cbind(MIMrun %>% select(-Site, -TSOI))
 
-
+### Plot SOC vs MIMSOC
+################################################
+# library(ggplot2)
+# library(Metrics)
+# 
+# plot_data <- MIMrun
+# 
+# r2_test <- cor.test(MIMrun$SOC, MIMrun$MIMSOC)
+# r_val <- round(as.numeric(unlist(r2_test ['estimate'])),2)
+# lb2 <- paste("R^2 == ", r_val)
+# 
+# rmse <- round(rmse(MIMrun$SOC, MIMrun$MIMSOC),2) 
+# 
+# ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=ANPP)) + 
+#   geom_abline(intercept = 0, slope = 1, linetype = "dashed")+
+#   geom_point(size=4, alpha=0.8) + 
+#   geom_text(aes(label=paste0(Site)),hjust=-0.2, vjust=0.2) +
+#   annotate("text", label = lb2, x = 2, y = 8.5, size = 6, colour = "black", parse=T) + 
+#   annotate("text", label = paste0("RMSE = ", rmse), x = 2, y = 7.4, size = 6, colour = "black")
