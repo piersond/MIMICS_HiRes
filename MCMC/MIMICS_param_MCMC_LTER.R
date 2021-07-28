@@ -77,7 +77,7 @@ curr_p <- data.frame(Vslope_x = 1,
 curr_cost <- 3.5
 
 #Set number of iterations (3 trials are nested within each run)
-MIM_runs <- 500
+MIM_runs <- 10000
 
 # Send progress statement to console
 print(paste0("Running ", as.character(MIM_runs), " MCMC iterations"))
@@ -183,3 +183,6 @@ nbrOfWorkers()
 #######################
 write.csv(MCMC_out, paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs), ".csv"))
 
+
+
+df <- MCMC_out %>% filter(improve == 1)

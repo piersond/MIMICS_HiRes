@@ -73,19 +73,25 @@ FI      <- c(0.05, 0.05)
 fmet_p <- c(1, 0.85, 0.013)
 depth <- 30 ###
 h2y        <- 24*365
-MICROtoECO <- depth * 1e4 * 1e-3         # mgC/cm3 to g/m2
+MICROtoECO <- depth * 1e4 * 1e-3  # mgC/cm3 to g/m2
+
+#Set default multipliers
+Tau_MULT = 1
+desorb_MULT = 1
+fPHYS_MULT = 1
+
 
 ########################################
 # Apply parameter multipliers
 ########################################
-Vslope = Vslope * 1
-Vint = Vint * 1
-Kslope = Kslope * 1
-Kint = Kint * 1
-CUE = CUE * 1
-Tau_MULT = 1
-desorb_MULT = 1
-fPHYS_MULT = 1
+# Vslope = Vslope * 1.916771
+# Vint = Vint * 0.6827946
+# Kslope = Kslope * 1.8520889
+# Kint = Kint * 0.3891929
+# CUE = CUE * 0.8135164
+# Tau_MULT = 0.8192231
+# desorb_MULT = 1.0952321
+# fPHYS_MULT = 2.535136
 
 ###########################################
 # MIMICS single point function
@@ -94,7 +100,7 @@ MIMICS1 <- function(df){
 
   #run notes
   note <- ""
-  print(df$Site)
+  #print(df$Site)
   
   
   ###set LIGNIN:N to fMET value
@@ -111,7 +117,7 @@ MIMICS1 <- function(df){
    
   ###set ANPP value
   ANPP       <- (df$pGPP+400)/2
-  print(ANPP)
+  #print(ANPP)
   #prevent negative ANPP
  # if(ANPP < 1){
  #   ANPP <- 1.19999
@@ -131,7 +137,7 @@ MIMICS1 <- function(df){
   
   # Calc litter input rate
   EST_LIT <- (ANPP / (365*24)) * 1e3 / 1e4
-  print(EST_LIT)# gC/m2/h (from gC/m2/y) then mgC/cm2/h(from gC/m2/h) 
+  #print(EST_LIT)# gC/m2/h (from gC/m2/y) then mgC/cm2/h(from gC/m2/h) 
   
   # ------------ caclulate parameters ---------------
   Vmax     <- exp(TSOI * Vslope + Vint) * aV 
@@ -155,7 +161,7 @@ MIMICS1 <- function(df){
   
   desorb <- desorb * desorb_MULT
   fPHYS <- fPHYS * fPHYS_MULT
-  print(desorb)
+  #print(desorb)
   
   
   pSCALAR  <- PHYS_scalar[1] * exp(PHYS_scalar[2]*(sqrt(fCLAY)))  #Scalar for texture effects on SOMp
