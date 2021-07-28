@@ -84,14 +84,14 @@ fPHYS_MULT = 1
 ########################################
 # Apply parameter multipliers
 ########################################
-# Vslope = Vslope * 1.916771
-# Vint = Vint * 0.6827946
-# Kslope = Kslope * 1.8520889
-# Kint = Kint * 0.3891929
-# CUE = CUE * 0.8135164
-# Tau_MULT = 0.8192231
-# desorb_MULT = 1.0952321
-# fPHYS_MULT = 2.535136
+# Vslope = Vslope * 1.693578
+# Vint = Vint * 0.633318
+# Kslope = Kslope * 1.782366
+# Kint = Kint * 0.3609913
+# CUE = CUE * 1
+# Tau_MULT = 1
+# desorb_MULT = 2.3635554
+# fPHYS_MULT = 2.0716163
 
 ###########################################
 # MIMICS single point function
@@ -310,6 +310,7 @@ ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=ANPP)) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed")+
   geom_point(size=4, alpha=0.8) + 
   geom_text(aes(label=paste0(Site)),hjust=-0.2, vjust=0.2) +
-  annotate("text", label = lb2, x = 4, y = 8.5, size = 6, colour = "black", parse=T) + 
-  annotate("text", label = paste0("RMSE = ", rmse), x = 4, y = 7.4, size = 6, colour = "black") 
+  annotate("text", label = lb2, x = 2, y = 8.5, size = 6, colour = "black", parse=T) + 
+  annotate("text", label = paste0("RMSE = ", rmse), x = 2, y = 7.4, size = 6, colour = "black") +
+  ylim(0,10) + xlim(0,10)
 
