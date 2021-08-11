@@ -60,7 +60,7 @@ fPHYS_MULT_default <- 1
 # MIMICS repeat run function
 ###########################################
 
-MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
+MIMrepeat <- function(forcing_df, rparams, output_type = "summary") {
 
     # Set global model parameters
     .GlobalEnv$Vslope = Vslope_default * rparams$Vslope_x[1]
@@ -76,10 +76,17 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
     MIMrun <- forcing_df %>% split(1:nrow(forcing_df)) %>% map(MIMICS1) %>% bind_rows() 
     
     #Optional combine MIMout with forcing data
-    MIMrun <- forcing_df %>% cbind(MIMrun %>% select(MIMSOC, MIMMIC, MIMLIT, MIM_CO, LITm, LITs, MICr, MICK, SOMa, SOMc, SOMp, JITn, DEBUG))
+    MIMrun <- forcing_df %>% cbind(MIMrun %>% select(MIMSOC, MIMMIC, MIMLIT, MIM_CO, LITm, LITs, MICr, MICK, SOMa, SOMc, SOMp, desorb, JITn, DEBUG))
     
     #add run number
     MIMrun$run_num <- rparams$run_num[1]
+    
+    
+    ######################################
+    # Selection of output data type
+    ######################################
+    if(output_type == "summary") {
+      # Option 1: Values for each site location in the forcing dataset
     
     
     ############################################
@@ -134,11 +141,14 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
     
     #Get mean LITs/LITm
     LITr_mn <- mean((as.numeric(MIMrun$LITs)/as.numeric(MIMrun$LITm)), na.rm = T)
+
+    #Calculate average desorb value
+    desorb_mn <- 1/(mean(MIMrun$desorb, na.rm = T)* 24 * 365)
     
     # Calculate average residual value
     resid_avg <- mean(MIMrun$SOC - MIMrun$MIMSOC, na.rm = T)
     resid_sd <- sd(MIMrun$SOC - MIMrun$MIMSOC, na.rm = T)
-    
+
     #RMSE
     RMSE <- rmse(MIMrun$SOC, MIMrun$MIMSOC)
     
@@ -167,6 +177,8 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
       LITpropSOC = LITpropSOC_mn,
       MIM_CO_mn = MIMCO_mn,
       LIT_RATIO_mn = LITr_mn,
+      
+      SOMpTO = desorb_mn,
       
       #More pools
       LITm_mn = LITm_mn_calc,
@@ -206,14 +218,9 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
       #debug info
       jitr_mn = mean(as.numeric(MIMrun$JITn), na.rm = T)
     )
-    
-    
-    ######################################
-    # Selection of output data type
-    ######################################
-    if(output_type == "summary") {
-      # Option 1: Values for each site location in the forcing dataset
       return(MIMOUT)
+    
+    
     } else if(output_type == "all") {
       # Option 2: Summary statistics for the run
       return(MIMrun)
@@ -243,6 +250,6 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
 #                           fPHYS_x = 0.9690,
 #                           run_num = 1)
 # 
-# test_output_summary <- MIMbrute(forcing_df = data, rparams = test_params, output_type = "summary")
-# test_output_all <- MIMbrute(forcing_df = data, rparams = test_params, output_type = "all")
-
+# test_output_summary <- MIMrepeat(forcing_df = data, rparams = test_params, output_type = "summary")
+# test_output_all <- MIMrepeat(forcing_df = data, rparams = test_params, output_type = "all")
+# 

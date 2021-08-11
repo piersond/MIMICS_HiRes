@@ -43,6 +43,7 @@ MCMC_out <- data.frame(i=0,
                      RMSE=3.5,
                      MICpropSOC=0,
                      LITpropSOC=0,
+                     SOMpTO = 0,
                      improve=1)
 
 ########################################
@@ -77,7 +78,7 @@ curr_p <- data.frame(Vslope_x = 1,
 curr_cost <- 3.5
 
 #Set number of iterations (3 trials are nested within each run)
-MIM_runs <- 10000
+MIM_runs <- 25
 
 # Send progress statement to console
 print(paste0("Running ", as.character(MIM_runs), " MCMC iterations"))
@@ -115,7 +116,7 @@ for(i in 1:MIM_runs) {
     }
     
     #Run MIMICS ftn with test parameters
-    MIMout <- MIMbrute(forcing_df = data, rparams = test_p)
+    MIMout <- MIMrepeat(forcing_df = data, rparams = test_p)
     
     #log parameter updates in dataframe
     iter_out <- data.frame(i=i,
@@ -133,6 +134,7 @@ for(i in 1:MIM_runs) {
                            RMSE=MIMout$RMSE,
                            MICpropSOC=MIMout$MICpropSOC,
                            LITpropSOC=MIMout$LITpropSOC,
+                           SOMpTO=MIMout$SOMpTO,
                            improve=0)
     
     
@@ -141,7 +143,12 @@ for(i in 1:MIM_runs) {
        MIMout$MICpropSOC > 0.005 &&
        MIMout$MICpropSOC < 0.08 &&
        MIMout$LITpropSOC > 0.01 &&
-       MIMout$LITpropSOC < 0.5) {
+       MIMout$LITpropSOC < 0.5)
+      
+      
+      
+      
+                                  {
       
         curr_p <- test_p
         curr_cost <- MIMout$RMSE

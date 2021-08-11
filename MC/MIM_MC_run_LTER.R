@@ -1,6 +1,6 @@
 ### MIMICS MC
 
-setwd("C:/github/MIMICS_HiRes")
+#setwd("C:/github/MIMICS_HiRes")
 
 ########################################
 # Load forcing data
@@ -19,18 +19,18 @@ source("MIMICS_ftns/MIMICS_repeat_base.R")
 ####################################
 
 # Set desired number of random parameter runs
-MIM_runs <- 1000
+MIM_runs <- 10
 
 ### Create random parameter dataframe
 ## Parameter range informed by range observed over 10+ MCMC analysis results
-rand_params <- data.frame(Vslope_x = runif(MIM_runs, 1.5, 4),  
-                          Vint_x = runif(MIM_runs, 0.1, 1.5),  
-                          Kslope_x = runif(MIM_runs, 0.8, 3.3),  
-                          Kint_x = runif(MIM_runs, 0.8, 3.3),  
-                          Tau_x = runif(MIM_runs, 0.3, 3),  
-                          CUE_x = runif(MIM_runs, 0.5, 1.5),  
-                          desorb_x = runif(MIM_runs, 0.3, 3),  
-                          fPHYS_x = runif(MIM_runs, 1, 3)  
+rand_params <- data.frame(Vslope_x = runif(MIM_runs, 0.2, 5),  
+                          Vint_x = runif(MIM_runs, 0.1, 3),  
+                          Kslope_x = runif(MIM_runs, 0.2, 5),  
+                          Kint_x = runif(MIM_runs, 0.1, 3),  
+                          Tau_x = runif(MIM_runs, 0.01, 3),  
+                          CUE_x = runif(MIM_runs, 0.3, 3),  
+                          desorb_x = runif(MIM_runs, 0.01, 3),  
+                          fPHYS_x = runif(MIM_runs, 0.01, 3)  
                           )
 
 rand_params$run_num <- seq(1,MIM_runs,1)
@@ -45,7 +45,7 @@ print(paste0("Starting ", MIM_runs, " runs"))
 print(paste0("Start time: ", Sys.time()))
 
 start_time <- Sys.time()
-MC_MIMICS <- rand_params %>% split(1:nrow(rand_params)) %>% future_map(~ MIMbrute(forcing_df = data, rparams = ., output_type = "all"), .progress=TRUE) %>% bind_rows()
+MC_MIMICS <- rand_params %>% split(1:nrow(rand_params)) %>% future_map(~ MIMrepeat(forcing_df = data, rparams = ., output_type = "all"), .progress=TRUE) %>% bind_rows()
 print(paste0("Task time: ", Sys.time() - start_time))
 
 # Release CPU cores

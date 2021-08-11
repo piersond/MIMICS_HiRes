@@ -1,6 +1,6 @@
 
 ## Set working drive
-setwd("C:/github/MIMICS_HiRes")
+#setwd("C:/github/MIMICS_HiRes")
 
 #Libraries
 library(rootSolve)
@@ -84,14 +84,14 @@ fPHYS_MULT = 1
 ########################################
 # Apply parameter multipliers
 ########################################
-Vslope = Vslope * 1.693578
-Vint = Vint * 0.633318
-Kslope = Kslope * 1.782366
-Kint = Kint * 0.3609913
-CUE = CUE * 1
-Tau_MULT = 1
-desorb_MULT = 2.3635554
-fPHYS_MULT = 2.0716163
+# Vslope = Vslope * 1.693578
+# Vint = Vint * 0.633318
+# Kslope = Kslope * 1.782366
+# Kint = Kint * 0.3609913
+# CUE = CUE * 1
+# Tau_MULT = 1
+# desorb_MULT = 2.3635554
+# fPHYS_MULT = 2.0716163
 
 ###########################################
 # MIMICS single point function
@@ -237,6 +237,7 @@ MIMICS1 <- function(df){
                        MIMMIC = MIMMIC,
                        MIMLIT = MIMLIT,
                        MIM_CO = MIM_CO,
+                       desorb = as.numeric(desorb),
                        LITm = table[1] * depth *1e4 / 1e6, #convert kgC/m2 from mgC/cm3 (0-30 cm) 
                        LITs = table[2] * depth *1e4 / 1e6,
                        MICr = table[3] * depth *1e4 / 1e6,
@@ -266,7 +267,7 @@ MIMICS1 <- function(df){
   #rm(I, VMAX, KM, fPHYS, fCHEM, fAVAI, tau, LITmin, SOMmin, MICtrn, desorb, DEsorb, OXIDAT)
   
   #DEBUG printouts
-  print(desorb)
+  #print(desorb)
   
   
   return(MIMout)
@@ -296,25 +297,29 @@ MIMout_single <- MIMICS1(data[1,])
 MIMrun <- data %>% split(1:nrow(data)) %>% map(~ MIMICS1(df=.)) %>% bind_rows()
 MIMrun <- data %>% cbind(MIMrun %>% select(-Site, -TSOI))
 
-
-### Plot SOC vs MIMSOC
-################################################
+# 
+# ### Plot SOC vs MIMSOC
+# ################################################
 library(ggplot2)
 library(Metrics)
 
 plot_data <- MIMrun
 
+#calc SOMp turnover time
+plot_data$desorb_yr <- plot_data$desorb*24*365
+plot_data$SOMpTO <- plot_data$SOMp/plot_data$desorb_yr
+
 r2_test <- cor.test(MIMrun$SOC, MIMrun$MIMSOC)
 r_val <- round(as.numeric(unlist(r2_test ['estimate'])),2)
 lb2 <- paste("R^2 == ", r_val)
 
-rmse <- round(rmse(MIMrun$SOC, MIMrun$MIMSOC),2) 
+rmse <- round(rmse(MIMrun$SOC, MIMrun$MIMSOC),2)
 
-ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=ANPP)) + 
+ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=ANPP)) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed")+
-  geom_point(size=4, alpha=0.8) + 
+  geom_point(size=4, alpha=0.8) +
   geom_text(aes(label=paste0(Site)),hjust=-0.2, vjust=0.2) +
-  annotate("text", label = lb2, x = 2, y = 8.5, size = 6, colour = "black", parse=T) + 
+  annotate("text", label = lb2, x = 2, y = 8.5, size = 6, colour = "black", parse=T) +
   annotate("text", label = paste0("RMSE = ", rmse), x = 2, y = 7.4, size = 6, colour = "black") +
   ylim(0,10) + xlim(0,10)
 
