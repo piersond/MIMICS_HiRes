@@ -98,42 +98,56 @@ fPHYS_MULT = 1
 ###########################################
 MIMICS1 <- function(df){
 
-  #run notes
+  ### Setup a var to collect run notes
   note <- ""
-  #print(df$Site)
   
-  
-  ###set LIGNIN:N to fMET value
+  ### Bring in lig:N forcing data
   lig_N <- df$lig_N
+  
+  ###########################################################
+  ### Set fMET equation
+  ###########################################################
+  ## Option A: Defualt fMET equation using lig:N values
   #fMET <- fmet_p[1] * (fmet_p[2] - fmet_p[3] * lig_N) 
-  #LTER SHORTCUT FMET
+  
+  ## If lignin:N data is missing, use a specified value
+  # if(lig_N == 0) {
+  #    fMET <- 0.6979 #<--sagebrush litter  value
+  #    print("Using default fMET")
+  #    } 
+  
+  ## Option B: LTER "SHORTCUT" fMET value (average from LiDET)
   fMET <- 0.3846423
   
-  #if lignin:N data missing, use specified value
- # if(lig_N == 0) {
- #    fMET <- 0.6979
-    #print("Using default fMET")
-#    } #<--sagebrush litter 
+  ###########################################################
    
-  ###set ANPP value
-  ANPP       <- (df$pGPP+400)/2
-  #print(ANPP)
-  #prevent negative ANPP
- # if(ANPP < 1){
- #   ANPP <- 1.19999
-#    note <- "Fixing ANPP < 1"
-#  }
+  ###Bring in forcing ANPP value
+  ANPP       <- df$pGPP
   
-  ### Set CLAY value
+  ## Modify as necessary to approximate ANPP
+  # e.g. ANPP ~ GPP from MSAVI +400, then divided by 2 
+  ANPP <-  (ANPP+400)/2
+
+  #prevent negative ANPP
+  # if(ANPP < 1){
+  #   ANPP <- 1.19999
+  #   print("Fixing ANPP < 1")
+  #  }
+  
+  ### Bring in CLAY value, convert from percent to decimal
   fCLAY      <- df$CLAY/100
   # Prevent clay < 3%
- # if(fCLAY < 0.02) {
-#    fCLAY <- 0.02
-    #print("Low clay value set to 2%")
-#  }
+  # if(fCLAY < 0.02) {
+  #   fCLAY <- 0.02
+  #   print("Low clay value set to 2%")
+  # }
   
-  ### Set TSOI value
+  ### Bring in TSOI value
   TSOI       <- df$TSOI
+  
+  ############################################################
+  # MIMICS MODEL CODE STARTS HERE
+  ############################################################
   
   # Calc litter input rate
   EST_LIT <- (ANPP / (365*24)) * 1e3 / 1e4
@@ -161,9 +175,7 @@ MIMICS1 <- function(df){
   
   desorb <- desorb * desorb_MULT
   fPHYS <- fPHYS * fPHYS_MULT
-  #print(desorb)
-  
-  
+
   pSCALAR  <- PHYS_scalar[1] * exp(PHYS_scalar[2]*(sqrt(fCLAY)))  #Scalar for texture effects on SOMp
   v_MOD    <- vMOD  
   k_MOD    <- kMOD 
@@ -214,12 +226,14 @@ MIMICS1 <- function(df){
   .GlobalEnv$OXIDAT <- OXIDAT
   
   
-  #test  <- stode(y = Ty, time = 1e6, fun = RXEQ, parms = Tpars, positive = TRUE)
+  # Using jitter
   test  <- stode_jitter(stode_y = Ty, stode_time = 1e6, stode_fun = RXEQ, stode_parms = Tpars, stode_pos = TRUE)
   
+  # Not using jitter
+  #test  <- stode(y = Ty, time = 1e6, fun = RXEQ, parms = Tpars, positive = TRUE)
   
-  ###Return MIMICS output 
-  #table[i,2:8] <- as.numeric(test[[1]])
+  
+  ### Calc and get MIMICS output 
   MIMLIT    <- (test[[1]][[1]]+test[[1]][[2]])  * depth *1e4 / 1e6 #convert kgC/m2 from mgC/cm3 (0-30 cm) 
   MIMMIC    <- (test[[1]][[3]]+test[[1]][[4]])  * depth *1e4 / 1e6
   MIM_CO    <-  test[[1]][[3]]/test[[1]][[4]]
@@ -265,19 +279,16 @@ MIMICS1 <- function(df){
 
   #remove global variables set for stode ftn
   #rm(I, VMAX, KM, fPHYS, fCHEM, fAVAI, tau, LITmin, SOMmin, MICtrn, desorb, DEsorb, OXIDAT)
-  
-  #DEBUG printouts
-  #print(desorb)
-  
-  
+
   return(MIMout)
   }
 
 #####################
-# Example use
+# Example use of 
 #####################
 
-# ### single point run
+# ##############################################
+# #single point run
 # ##############################################
 # data <- data.frame(Site = 1,
 #                    pGPP = 1.39,
@@ -288,53 +299,40 @@ MIMICS1 <- function(df){
 # MIMout_single <- MIMICS1(data[1,])
 # 
 # 
-# ### full forcing dataset run
 # ##############################################
-data <- data <- read.csv("RCrk_Modelling_Data/LTER_SITE_1.csv", as.is=T)
-
-MIMout_single <- MIMICS1(data[1,])
-
-MIMrun <- data %>% split(1:nrow(data)) %>% map(~ MIMICS1(df=.)) %>% bind_rows()
-MIMrun <- data %>% cbind(MIMrun %>% select(-Site, -TSOI))
-
+# # Full forcing dataset run
+# ##############################################
+# data <- data <- read.csv("RCrk_Modelling_Data/LTER_SITE_1.csv", as.is=T)
 # 
-# ### Plot SOC vs MIMSOC
+# MIMout_single <- MIMICS1(data[1,])
+# 
+# MIMrun <- data %>% split(1:nrow(data)) %>% map(~ MIMICS1(df=.)) %>% bind_rows()
+# MIMrun <- data %>% cbind(MIMrun %>% select(-Site, -TSOI))
+# 
+# 
 # ################################################
-library(ggplot2)
-library(Metrics)
-
-plot_data <- MIMrun
-
-#calc SOMp turnover time
-plot_data$desorb_yr <- plot_data$desorb*24*365
-plot_data$SOMpTO <- plot_data$SOMp/plot_data$desorb_yr
-
-r2_test <- cor.test(MIMrun$SOC, MIMrun$MIMSOC)
-r_val <- round(as.numeric(unlist(r2_test ['estimate'])),2)
-lb2 <- paste("R^2 == ", r_val)
-
-rmse <- round(rmse(MIMrun$SOC, MIMrun$MIMSOC),2)
-
-ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=ANPP)) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed")+
-  geom_point(size=4, alpha=0.8) +
-  geom_text(aes(label=paste0(Site)),hjust=-0.2, vjust=0.2) +
-  annotate("text", label = lb2, x = 2, y = 8.5, size = 6, colour = "black", parse=T) +
-  annotate("text", label = paste0("RMSE = ", rmse), x = 2, y = 7.4, size = 6, colour = "black") +
-  ylim(0,10) + xlim(0,10)
-
-
-
-
-# df2 <- read.csv("desorb_comp.csv")
-# colnames(df2)[1] <- "Site"
-# df2$Site <- with(df2, reorder(Site, Clay))
+# # Plot SOC vs MIMSOC
+# ################################################
+# library(ggplot2)
+# library(Metrics)
 # 
-# ggplot(df2, aes(x=Site, y=desorb_y, color=pset)) + geom_point(size=4) + 
-#   geom_point(aes(x=Site, y=Clay/100, color="Clay"), pch=16, alpha=0.4, size=2) +
-#   scale_color_manual(values=c("black", "red", "blue")) +
-#   theme_bw() +
-#   ggtitle("LTER Site MIMICS desorb rates") +
-#   ylab("desorb (yr-1)") +
-#   xlab("LTER Site")
+# plot_data <- MIMrun
+# 
+# #calc SOMp turnover time
+# plot_data$desorb_yr <- plot_data$desorb*24*365
+# plot_data$SOMpTO <- plot_data$SOMp/plot_data$desorb_yr
+# 
+# r2_test <- cor.test(MIMrun$SOC, MIMrun$MIMSOC)
+# r_val <- round(as.numeric(unlist(r2_test ['estimate'])),2)
+# lb2 <- paste("R^2 == ", r_val)
+# 
+# rmse <- round(rmse(MIMrun$SOC, MIMrun$MIMSOC),2)
+# 
+# ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=ANPP)) +
+#   geom_abline(intercept = 0, slope = 1, linetype = "dashed")+
+#   geom_point(size=4, alpha=0.8) +
+#   geom_text(aes(label=paste0(Site)),hjust=-0.2, vjust=0.2) +
+#   annotate("text", label = lb2, x = 2, y = 8.5, size = 6, colour = "black", parse=T) +
+#   annotate("text", label = paste0("RMSE = ", rmse), x = 2, y = 7.4, size = 6, colour = "black") +
+#   ylim(0,10) + xlim(0,10)
 
