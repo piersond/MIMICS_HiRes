@@ -170,35 +170,32 @@ for(i in 1:MIM_runs) {
         # ONLY USEFUL IF COMPUTATIONAL POWER IS LIMITED, comment out if not
         #######################################################################
         # Set walk rate
-        walk_rt = 1.5 # Set the parameter range min to the current value dived by
+        walk_rt = 2 # Set the parameter range min to the current value dived by
                       # this number, and the max to the current value multiplied
                       # by this number
 
         # New proposal distributions
         ####################################
         p_rng[1,2] <- iter_out$Vslope_x / walk_rt # V_slope min
-        p_rng[1,3] <- iter_out$Vslope_x * walk_rt # V_slope max
+        p_rng[1,3] <- iter_out$Vslope_x +(iter_out$Vslope_x-(iter_out$Vslope_x/walk_rt)) # V_slope max
 
         p_rng[2,2] <- iter_out$Vint_x / walk_rt # V_int min
-        p_rng[2,3] <- iter_out$Vint_x * walk_rt # V_int max
+        p_rng[2,3] <- iter_out$Vint_x +(iter_out$Vint_x-(iter_out$Vint_x/walk_rt)) # V_int max
 
         p_rng[3,2] <- iter_out$Kslope_x / walk_rt # K_slope min
-        p_rng[3,3] <- iter_out$Kslope_x * walk_rt # K_slope max
-
-        p_rng[4,2] <- iter_out$Kint / walk_rt # K_int min
-        p_rng[4,3] <- iter_out$Kint * walk_rt # K_int max
+        p_rng[3,3] <- iter_out$Kslope_x +(iter_out$Kslope_x-(iter_out$Kslope_x/walk_rt)) # K_slope max
 
         p_rng[5,2] <- iter_out$Tau_x / walk_rt # Tau min
-        p_rng[5,3] <- iter_out$Tau_x * walk_rt # Tau max
+        p_rng[5,3] <- iter_out$Tau_x +(iter_out$Tau_x-(iter_out$Tau_x/walk_rt)) # Tau max
 
         p_rng[6,2] <- iter_out$CUE_x / walk_rt # CUE min
-        p_rng[6,3] <- iter_out$CUE_x * walk_rt # CUE max
+        p_rng[6,3] <- iter_out$CUE_x +(iter_out$CUE_x-(iter_out$CUE_x/walk_rt)) # CUE max
 
         p_rng[7,2] <- iter_out$desorb_x / walk_rt # desorb min
-        p_rng[7,3] <- iter_out$desorb_x * walk_rt # desorb max
+        p_rng[7,3] <- iter_out$desorb_x +(iter_out$desorb_x-(iter_out$desorb_x/walk_rt)) # desorb max
 
         p_rng[8,2] <- iter_out$fPHYS_x / walk_rt # fPHYS min
-        p_rng[8,3] <- iter_out$fPHYS_x * walk_rt # fPHYS max
+        p_rng[8,3] <- iter_out$fPHYS_x +(iter_out$fPHYS_x-(iter_out$fPHYS_x/walk_rt)) # fPHYS max
         
     } else {
         #update tracker for number of iterations without improvement
@@ -240,7 +237,13 @@ pVint_x <- ggplot(MCMC_out, aes(x=iter, y=Vint_x)) + geom_line(color="grey50", a
 pKslope_x <- ggplot(MCMC_out, aes(x=iter, y=Kslope_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
 pKint_x <- ggplot(MCMC_out, aes(x=iter, y=Kint_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
 
-grid.arrange(pRMSE, pr2, pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKslope_x, ncol = 2)
+walk_plot <- grid.arrange(pRMSE, pr2, pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKslope_x, ncol = 2)
+
+#save plot
+ggsave(file=paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs),"_walk_plot", ".jpeg"), 
+       plot=walk_plot,
+       width=10,
+       height=8)
 
 #######################
 # Export MCMC run data

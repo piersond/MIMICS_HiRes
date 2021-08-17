@@ -3,6 +3,12 @@
 #setwd("C:/github/MIMICS_HiRes")
 
 ########################################
+# Load MIMICS data and ftns from Brute Forcing script
+########################################
+source("MIMICS_ftns/MIMICS_repeat_base.R")
+
+
+########################################
 # Load forcing data
 ########################################
 data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
@@ -11,11 +17,6 @@ data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
 ## Save on dataframe size and we can add the back later
 
 data <- data %>% select(Site, lat, long, SOC, CLAY, pGPP, estCLAY, TSOI, lig_N)
-
-########################################
-# Load MIMICS data and ftns from Brute Forcing script
-########################################
-source("MIMICS_ftns/MIMICS_repeat_base.R")
 
 
 ####################################

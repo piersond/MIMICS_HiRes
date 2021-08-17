@@ -8,7 +8,7 @@ source("Figures/plot_theme.R")
 ####################
 # Load MC data
 ####################
-MCdata <- readRDS("MC/Output/MC_MIMICS_data-r1e+05_20210728_120727_.rds")
+MCdata <- readRDS("MC/Output/MC_MIMICS_data-r5000_20210817_125704_.rds")
 
 ##########################################################
 # Calculate RMSE and R2 for each run in the MC dataset
@@ -40,7 +40,7 @@ best_fit <- stats %>% filter(MICtoSOC < 0.08) %>%
 #Plot SOC vs MIMSOC
 ################################################################################
 ### Based on stats in "best-fit" dataframe, plot data for specific run number
-run_to_plot <- 52301
+run_to_plot <- 34
 ################################################################################
 
 plot_data <- MCdata %>% filter(run_num == run_to_plot)
