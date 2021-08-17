@@ -7,6 +7,10 @@
 ########################################
 data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
 
+# Trim out data columns not required for the MC run 
+## Save on dataframe size and we can add the back later
+
+data <- data %>% select(Site, lat, long, SOC, CLAY, pGPP, estCLAY, TSOI, lig_N)
 
 ########################################
 # Load MIMICS data and ftns from Brute Forcing script
@@ -19,7 +23,7 @@ source("MIMICS_ftns/MIMICS_repeat_base.R")
 ####################################
 
 # Set desired number of random parameter runs
-MIM_runs <- 100000
+MIM_runs <- 500000
 
 ### Create random parameter dataframe
 ## Parameter range informed by range observed over 10+ MCMC analysis results
@@ -45,7 +49,7 @@ print(paste0("Starting ", MIM_runs, " runs"))
 print(paste0("Start time: ", Sys.time()))
 
 start_time <- Sys.time()
-MC_MIMICS <- rand_params %>% split(1:nrow(rand_params)) %>% future_map(~ MIMbrute(forcing_df = data, rparams = ., output_type = "all"), .progress=TRUE) %>% bind_rows()
+MC_MIMICS <- rand_params %>% split(1:nrow(rand_params)) %>% future_map(~ MIMrepeat(forcing_df = data, rparams = ., output_type = "all"), .progress=TRUE) %>% bind_rows()
 print(paste0("Task time: ", Sys.time() - start_time))
 
 # Release CPU cores

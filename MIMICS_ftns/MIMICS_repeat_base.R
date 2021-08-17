@@ -1,4 +1,3 @@
-
 ## Set working drive
 #setwd("C:/github/MIMICS_HiRes")
 
@@ -60,26 +59,33 @@ fPHYS_MULT_default <- 1
 # MIMICS repeat run function
 ###########################################
 
-MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
-
-    # Set global model parameters
-    .GlobalEnv$Vslope = Vslope_default * rparams$Vslope_x[1]
-    .GlobalEnv$Vint = Vint_default * rparams$Vint_x[1]
-    .GlobalEnv$Kslope = Kslope_default * rparams$Kslope_x[1]
-    .GlobalEnv$Kint = Kint_default * rparams$Kint_x[1]
-    .GlobalEnv$Tau_MULT = Tau_MULT_default * rparams$Tau_x[1]
-    .GlobalEnv$CUE = CUE_default * rparams$CUE_x[1]
-    .GlobalEnv$desorb_MULT = desorb_MULT_default * rparams$desorb_x[1]
-    .GlobalEnv$fPHYS_MULT = fPHYS_MULT_default * rparams$fPHYS_x[1]
-    
-    #full run of forcing data csv
-    MIMrun <- forcing_df %>% split(1:nrow(forcing_df)) %>% map(MIMICS1) %>% bind_rows() 
-    
-    #Optional combine MIMout with forcing data
-    MIMrun <- forcing_df %>% cbind(MIMrun %>% select(MIMSOC, MIMMIC, MIMLIT, MIM_CO, LITm, LITs, MICr, MICK, SOMa, SOMc, SOMp, JITn, DEBUG))
-    
-    #add run number
-    MIMrun$run_num <- rparams$run_num[1]
+MIMrepeat <- function(forcing_df, rparams, output_type = "summary") {
+  
+  # Set global model parameters
+  .GlobalEnv$Vslope = Vslope_default * rparams$Vslope_x[1]
+  .GlobalEnv$Vint = Vint_default * rparams$Vint_x[1]
+  .GlobalEnv$Kslope = Kslope_default * rparams$Kslope_x[1]
+  .GlobalEnv$Kint = Kint_default * rparams$Kint_x[1]
+  .GlobalEnv$Tau_MULT = Tau_MULT_default * rparams$Tau_x[1]
+  .GlobalEnv$CUE = CUE_default * rparams$CUE_x[1]
+  .GlobalEnv$desorb_MULT = desorb_MULT_default * rparams$desorb_x[1]
+  .GlobalEnv$fPHYS_MULT = fPHYS_MULT_default * rparams$fPHYS_x[1]
+  
+  #full run of forcing data csv
+  MIMrun <- forcing_df %>% split(1:nrow(forcing_df)) %>% map(MIMICS1) %>% bind_rows() 
+  
+  #Optional combine MIMout with forcing data
+  MIMrun <- forcing_df %>% cbind(MIMrun %>% select(MIMSOC, MIMMIC, MIMLIT, MIM_CO, LITm, LITs, MICr, MICK, SOMa, SOMc, SOMp, desorb, JITn, DEBUG))
+  
+  #add run number
+  MIMrun$run_num <- rparams$run_num[1]
+  
+  
+  ######################################
+  # Selection of output data type
+  ######################################
+  if(output_type == "summary") {
+    # Option 1: Values for each site location in the forcing dataset
     
     
     ############################################
@@ -113,13 +119,13 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
     
     MICK_mn_calc <- mean(MIMrun$MICK, na.rm=T)
     MICK_sd_calc <- sd(MIMrun$MICK, na.rm=T)   
-
+    
     SOMa_mn_calc <- mean(MIMrun$SOMa, na.rm=T)
     SOMa_sd_calc <- sd(MIMrun$SOMa, na.rm=T)      
     
     SOMc_mn_calc <- mean(MIMrun$SOMc, na.rm=T)
     SOMc_sd_calc <- sd(MIMrun$SOMc, na.rm=T)   
-
+    
     SOMp_mn_calc <- mean(MIMrun$SOMp, na.rm=T)
     SOMp_sd_calc <- sd(MIMrun$SOMp, na.rm=T)   
     
@@ -134,6 +140,9 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
     
     #Get mean LITs/LITm
     LITr_mn <- mean((as.numeric(MIMrun$LITs)/as.numeric(MIMrun$LITm)), na.rm = T)
+    
+    #Calculate average desorb value
+    SOMpTO_mn <- 1/(mean(MIMrun$desorb, na.rm = T)* 24 * 365)
     
     # Calculate average residual value
     resid_avg <- mean(MIMrun$SOC - MIMrun$MIMSOC, na.rm = T)
@@ -167,6 +176,8 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
       LITpropSOC = LITpropSOC_mn,
       MIM_CO_mn = MIMCO_mn,
       LIT_RATIO_mn = LITr_mn,
+      
+      SOMpTO = SOMpTO_mn,
       
       #More pools
       LITm_mn = LITm_mn_calc,
@@ -206,24 +217,19 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
       #debug info
       jitr_mn = mean(as.numeric(MIMrun$JITn), na.rm = T)
     )
+    return(MIMOUT)
     
     
-    ######################################
-    # Selection of output data type
-    ######################################
-    if(output_type == "summary") {
-      # Option 1: Values for each site location in the forcing dataset
-      return(MIMOUT)
-    } else if(output_type == "all") {
-      # Option 2: Summary statistics for the run
-      return(MIMrun)
-    } else {
-      print("Set function parameter 'output_type' to either 'summary' or 'all'")
-    }
-    
-
-    
-
+  } else if(output_type == "all") {
+    # Option 2: Summary statistics for the run
+    return(MIMrun)
+  } else {
+    print("Set function parameter 'output_type' to either 'summary' or 'all'")
+  }
+  
+  
+  
+  
 }
 
 #####################
@@ -231,18 +237,17 @@ MIMbrute <- function(forcing_df, rparams, output_type = "summary") {
 #####################
 
 # bring in forcing data
-# data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
-# 
-# test_params <- data.frame(Vslope_x = 1.5382,
-#                           Vint_x = 1.8601,
-#                           Kslope_x = 0.8204,
-#                           Kint_x = 1.7086,
-#                           Tau_x = 0.8446,
-#                           CUE_x = 0.9113,
-#                           desorb_x = 1.7790,
-#                           fPHYS_x = 0.9690,
-#                           run_num = 1)
-# 
-# test_output_summary <- MIMbrute(forcing_df = data, rparams = test_params, output_type = "summary")
-# test_output_all <- MIMbrute(forcing_df = data, rparams = test_params, output_type = "all")
+data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
 
+test_params <- data.frame(Vslope_x = 1.5382,
+                          Vint_x = 1.8601,
+                          Kslope_x = 0.8204,
+                          Kint_x = 1.7086,
+                          Tau_x = 0.8446,
+                          CUE_x = 0.9113,
+                          desorb_x = 1.7790,
+                          fPHYS_x = 0.9690,
+                          run_num = 1)
+
+test_output_summary <- MIMrepeat(forcing_df = data, rparams = test_params, output_type = "summary")
+test_output_all <- MIMrepeat(forcing_df = data, rparams = test_params, output_type = "all")

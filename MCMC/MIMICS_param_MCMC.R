@@ -3,7 +3,7 @@
 # FYI: Packages are loaded in MIMICS_base_ftn.R
 
 # For local run
-#setwd("C:/github/MIMICS_HiRes")
+setwd("C:/github/MIMICS_HiRes")
 
 ########################################
 # Load forcing data
@@ -19,11 +19,12 @@ source("MIMICS_ftns/MIMICS_repeat_base.R")
 
 ########################################
 # Set allowable min/max range for each MIMICS parameter
+## Values are multipliers of default parameters in MIMICS sandbox
 ########################################
 
 p_rng <- data.frame(Parameter = c("Vslope", "Vint", "Kslope", "Kint", "Tau", "CUE", "desorb", "fPHYS"),
-                    P_min = c(0.5, 0.5, 0.5, 0.5, 0.1, 0.1, 0.1, 0.1),
-                    P_max = c(4, 4, 4, 4, 3, 3, 3, 3))
+                    P_min = c(0.5, 0.5, 0.5, 0.5, 0.1, 0.5, 0.005, 0.1),
+                    P_max = c(4, 4, 4, 4, 3, 2, 0.4, 2))
 
 ########################################
 # Create dataframe to store MCMC steps
@@ -43,6 +44,8 @@ MCMC_out <- data.frame(i=0,
                      RMSE=3.5,
                      MICpropSOC=0,
                      LITpropSOC=0,
+                     MIM_CO_Avg=0,
+                     SOMpTOvAvg=0,
                      improve=1)
 
 ########################################
@@ -74,13 +77,15 @@ curr_p <- data.frame(Vslope_x = 1,
                      run_num=NA)
 
 # Set initial cost value (RMSE value to improve from)
-curr_cost <- 3.5
+curr_cost <- 3.5 #RMSE value to improve upon
 
 #Set number of iterations (3 trials are nested within each run)
-MIM_runs <- 5000
+MIM_runs <- 1000
 
 # Send progress statement to console
 print(paste0("Running ", as.character(MIM_runs), " MCMC iterations"))
+
+###DEBUG
 
 #Run MCMC loop
 for(i in 1:MIM_runs) {
@@ -115,7 +120,7 @@ for(i in 1:MIM_runs) {
     }
     
     #Run MIMICS ftn with test parameters
-    MIMout <- MIMbrute(forcing_df = data, rparams = test_p)
+    MIMout <- MIMrepeat(forcing_df = data, rparams = test_p)
     
     #log parameter updates in dataframe
     iter_out <- data.frame(i=i,
@@ -133,21 +138,68 @@ for(i in 1:MIM_runs) {
                            RMSE=MIMout$RMSE,
                            MICpropSOC=MIMout$MICpropSOC,
                            LITpropSOC=MIMout$LITpropSOC,
+                           MIM_CO_Avg=MIMout$MIM_CO_mn,
+                           SOMpTOvAvg=MIMout$SOMpTO,
                            improve=0)
-    
     
     #Make decision based on cost outcome
     if(MIMout$RMSE < curr_cost &&
-       MIMout$MICpropSOC > 0.005 &&
+       MIMout$MICpropSOC > 0.01 &&
        MIMout$MICpropSOC < 0.08 &&
-       MIMout$LITpropSOC > 0.01 &&
-       MIMout$LITpropSOC < 0.5) {
+       MIMout$LITpropSOC > 0.05 &&
+       MIMout$LITpropSOC < 0.50 &&
+       MIMout$MIM_CO_mn > 0.01 &&
+       MIMout$MIM_CO_mn < 100 &&
+       MIMout$SOMpTO > 50 &&
+       MIMout$SOMpTO < 1000) 
+      {
       
+        #Update targets
         curr_p <- test_p
         curr_cost <- MIMout$RMSE
         iter_out$improve <- 1
-    }
         
+        ## Walk proposal distributions 
+        # ONLY USEFUL IF COMPUTATIONAL POWER IS LIMITED, comment out if not
+        #######################################################################
+        # Set walk rate
+        # walk_rt = 10 # Set the parameter range min to the current value dived by
+        #             # this number, and the max to the cxurrent value multiplied 
+        #             # by this number
+        # 
+        # # New proposal distributions
+        # ####################################
+        # p_rng[1,2] <- iter_out$Vslope_x / walk_rt # V_slope min
+        # p_rng[1,3] <- iter_out$Vslope_x * walk_rt # V_slope max
+        # 
+        # p_rng[2,2] <- iter_out$Vint_x / walk_rt # V_int min
+        # p_rng[2,3] <- iter_out$Vint_x * walk_rt # V_int max
+        # 
+        # p_rng[3,2] <- iter_out$Kslope_x / walk_rt # K_slope min
+        # p_rng[3,3] <- iter_out$Kslope_x * walk_rt # K_slope max
+        # 
+        # p_rng[4,2] <- iter_out$Kint / walk_rt # K_int min
+        # p_rng[4,3] <- iter_out$Kint * walk_rt # K_int max
+        # 
+        # p_rng[5,2] <- iter_out$Tau_x / walk_rt # Tau min
+        # p_rng[5,3] <- iter_out$Tau_x * walk_rt # Tau max
+        # 
+        # p_rng[6,2] <- iter_out$CUE_x / walk_rt # CUE min
+        # p_rng[6,3] <- iter_out$CUE_x * walk_rt # CUE max
+        # 
+        # p_rng[7,2] <- iter_out$desorb_x / walk_rt # desorb min
+        # p_rng[7,3] <- iter_out$desorb_x * walk_rt # desorb max
+        # 
+        # p_rng[8,2] <- iter_out$fPHYS_x / walk_rt # fPHYS min
+        # p_rng[8,3] <- iter_out$fPHYS_x * walk_rt # fPHYS max
+        
+        # Slowly tighten distributions over many iterations
+        #######################################################
+        # Would this be appropriate...?
+        
+      }
+       
+      # Export MCMC data
       MCMC_out <- rbind(MCMC_out, iter_out)
     
   }
