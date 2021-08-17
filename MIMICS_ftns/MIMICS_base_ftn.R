@@ -23,7 +23,7 @@ stode_jitter <- function(stode_y = Ty, stode_time = 1e6, stode_fun = RXEQ, stode
   while (!success) {
     run_i <- run_i + 1
     #do something
-    test  <- stode(y = stode_y, time = stode_time, fun = stode_fun, parms = stode_parms, positive = stode_pos)
+    test  <- quiet(stode(y = stode_y, time = stode_time, fun = stode_fun, parms = stode_parms, positive = stode_pos)) #Suppress: "diagonal element is zero"
     tbl <- as.numeric(test[[1]])
     
     # Repeat stode ftn if the r or K microbial pools crash below 1e-10

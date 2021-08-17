@@ -45,3 +45,12 @@ RXEQ <- function(t, y, pars) {
     list(c(dLIT_1, dLIT_2, dMIC_1, dMIC_2, dSOM_1, dSOM_2, dSOM_3))
   })
 }
+
+
+#funtion to prevent print messages from a ftn
+## Used to prevent stode in mimics base ft from glomming up console with "Diagonal element is 0"
+quiet <- function(x) { 
+  sink(tempfile()) 
+  on.exit(sink()) 
+  invisible(force(x)) 
+} 
