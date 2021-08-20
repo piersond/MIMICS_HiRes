@@ -28,14 +28,14 @@ MIM_runs <- 500000
 
 ### Create random parameter dataframe
 ## Parameter range informed by range observed over 10+ MCMC analysis results
-rand_params <- data.frame(Vslope_x = runif(MIM_runs, 1.5, 4),  
-                          Vint_x = runif(MIM_runs, 0.1, 1.5),  
-                          Kslope_x = runif(MIM_runs, 0.8, 3.3),  
-                          Kint_x = runif(MIM_runs, 0.8, 3.3),  
+rand_params <- data.frame(Vslope_x = runif(MIM_runs, 0.4, 4),  
+                          Vint_x = runif(MIM_runs, 0.3, 3),  
+                          Kslope_x = runif(MIM_runs, 0.4, 4),  
+                          Kint_x = runif(MIM_runs, 0.3, 3),  
                           Tau_x = runif(MIM_runs, 0.3, 3),  
                           CUE_x = runif(MIM_runs, 0.5, 1.5),  
-                          desorb_x = runif(MIM_runs, 0.3, 3),  
-                          fPHYS_x = runif(MIM_runs, 1, 3)  
+                          desorb_x = runif(MIM_runs, 0.001, 0.3),  
+                          fPHYS_x = runif(MIM_runs, 0.4, 4)  
                           )
 
 rand_params$run_num <- seq(1,MIM_runs,1)

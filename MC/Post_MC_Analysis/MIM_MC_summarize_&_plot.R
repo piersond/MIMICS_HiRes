@@ -8,15 +8,22 @@ source("Figures/plot_theme.R")
 ####################
 # Load MC data
 ####################
-MCdata <- readRDS("MC/Output/MC_MIMICS_data-r5000_20210817_125704_.rds")
+MCdata <- readRDS("MC/Output/MC_runs_compiled20210819.rds")
 
 ##########################################################
 # Calculate RMSE and R2 for each run in the MC dataset
 ##########################################################
+## If missing, add SOMpTOv
+MCdata$SOMpTOv <- 1/(MCdata$desorb* 24 * 365)
+
 # Calc RMSE for all runs
 stats <- MCdata %>% group_by(run_num) %>% summarize(RMSE = rmse(SOC, MIMSOC),
-                                                     MICtoSOC = mean(MIMMIC/MIMSOC),
-                                                     LITtoSOC = mean(MIMLIT/MIMSOC))
+                                                    MICtoSOC = mean(MIMMIC/MIMSOC),
+                                                    LITtoSOC = mean(MIMLIT/MIMSOC),
+                                                    MIM_CO_Avg = mean(MIM_CO),
+                                                    SOMpTOvAvg = mean(SOMpTOv),
+                                                    desorbx_mn = mean(desorb_x))
+
 stats$RMSE <- round(stats$RMSE,3)
 
 #Calc correlations
@@ -32,15 +39,20 @@ stats$RMSE <- round(stats$RMSE,3)
 # stats <- stats %>% left_join(corr_data)
 
 ### Filter by MIMMIC and LIT
-best_fit <- stats %>% filter(MICtoSOC < 0.08) %>%
-                        filter(MICtoSOC > 0.05) %>%
-                        filter(LITtoSOC > 0.01)
-
+best_fit <- stats %>% filter(MICtoSOC > 0.005) %>%
+                      filter(MICtoSOC < 0.08) %>%
+                      filter(LITtoSOC > 0.01) %>%
+                      filter(LITtoSOC < 0.50) %>%
+                      filter(MIM_CO_Avg > 0.01) %>%
+                      filter(MIM_CO_Avg < 100) %>%
+                      filter(SOMpTOvAvg > 10) %>%
+                      filter(SOMpTOvAvg < 1000)
+  
 
 #Plot SOC vs MIMSOC
 ################################################################################
 ### Based on stats in "best-fit" dataframe, plot data for specific run number
-run_to_plot <- 34
+run_to_plot <- 35366
 ################################################################################
 
 plot_data <- MCdata %>% filter(run_num == run_to_plot)
@@ -71,4 +83,30 @@ ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=pGPP+400)) + geom_point(size=3, alp
   ylim(0,15) +
   scale_colour_gradient(low = "orange", high = "dark green", na.value = NA, name="GPP ") +
   theme(legend.key.size = unit(2,"line"))
+
+
+################################
+# Save best-fit parameters
+################################
+
+# # Best parameter combo
+# best_run <- 35366
+# 
+# best_pcombo <- MCdata %>% filter(run_num == best_run) %>%
+#                   select(run_num, Vslope_x, Vint_x, Kslope_x, Kint_x,
+#                          CUE_x, Tau_x, desorb_x, fPHYS_x) %>%
+#                   unique()
+# 
+# write.csv(best_pcombo, paste0("MC/Output/", "best_MC_Pcombo_", format(Sys.time(), "%Y%m%d"), ".csv"), row.names = F)
+# 
+# 
+# # Set of best parameter combos with RMSE with 10% of lowest RMSE
+# best_pcombos <- best_fit %>% filter(RMSE < (min(RMSE)*1.1)) %>%
+#                   left_join(MCdata) %>% na.omit(RMSE)
+# 
+# write.csv(best_pcombos, paste0("MC/Output/", "best_set_of_MC_Pcombos_", format(Sys.time(), "%Y%m%d"), ".csv"), row.names = F)
+
+
+
+
 

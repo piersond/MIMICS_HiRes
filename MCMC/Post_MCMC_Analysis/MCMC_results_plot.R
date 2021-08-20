@@ -76,35 +76,35 @@ pcols <- colfunc(length(names))
 colfunc2 <-colorRampPalette(c("#d54813","#f73c00","#850000"))
 pcols2 <- colfunc2(length(names))
 
-pRMSE <- ggplot(MCMC, aes(x=Iteration, y=RMSE, colour=factor(ID))) + geom_line(alpha=0.5, size=1.3) + geom_point(size=2, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols2 ,guide = guide_legend(nrow=2)) + ylim(1,3.5) 
+pRMSE <- ggplot(MCMC, aes(x=Iteration, y=RMSE, colour=factor(ID))) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
+  scale_color_manual(values = pcols2 ,guide = guide_legend(nrow=2))# + ylim(1,3.5) 
 
-pr2 <- ggplot(MCMC, aes(x=Iteration, y=r2, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=2, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols2 ,guide = guide_legend(nrow=2)) + ylim(0, 1) 
+pr2 <- ggplot(MCMC, aes(x=Iteration, y=r2, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
+  scale_color_manual(values = pcols2 ,guide = guide_legend(nrow=2))# + ylim(0.5, 1) 
 
-pTau_x <- ggplot(MCMC, aes(x=Iteration, y=Tau_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=2, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2)) + ylim(0.1, 3) 
+pTau_x <- ggplot(MCMC, aes(x=Iteration, y=Tau_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
+  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2))# + ylim(0.5, 2) 
 
-pCUE_x <-ggplot(MCMC, aes(x=Iteration, y=CUE_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=2, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2)) + ylim(0.1, 3) 
+pCUE_x <-ggplot(MCMC, aes(x=Iteration, y=CUE_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
+  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2))# + ylim(0.5, 2) 
 
-pDesorb_x <- ggplot(MCMC, aes(x=Iteration, y=desorb_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=2, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2)) + ylim(0.1, 3) 
+pDesorb_x <- ggplot(MCMC, aes(x=Iteration, y=desorb_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
+  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2))# + ylim(0.1, 3) 
 
-pFPHYS_x <- ggplot(MCMC, aes(x=Iteration, y=fPHYS_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=2, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2)) + ylim(0.1, 3) 
+pFPHYS_x <- ggplot(MCMC, aes(x=Iteration, y=fPHYS_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
+  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2))# + ylim(0.1, 3) 
 
-pVslope_x <- ggplot(MCMC, aes(x=Iteration, y=Vslope_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=2, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2)) + ylim(0.5, 4) 
+pVslope_x <- ggplot(MCMC, aes(x=Iteration, y=Vslope_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
+  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2))# + ylim(0.5, 4) 
 
-pVint_x <- ggplot(MCMC, aes(x=Iteration, y=Vint_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=2, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2)) + ylim(0.5, 4) 
+pVint_x <- ggplot(MCMC, aes(x=Iteration, y=Vint_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
+  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2))# + ylim(0.5, 4) 
 
-pKslope_x <- ggplot(MCMC, aes(x=Iteration, y=Kslope_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=2, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2)) + ylim(0.5, 4) 
+pKslope_x <- ggplot(MCMC, aes(x=Iteration, y=Kslope_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
+  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2))# + ylim(0.5, 4) 
 
-pKint_x <- ggplot(MCMC, aes(x=Iteration, y=Kint_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=2, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2)) + ylim(0.5, 4) 
+pKint_x <- ggplot(MCMC, aes(x=Iteration, y=Kint_x, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
+  scale_color_manual(values = pcols ,guide = guide_legend(nrow=2))# + ylim(0.5, 4) 
 
 # Put all plotsa together in a matrix
 mplot <- ggarrange(pRMSE, pr2, pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKslope_x,  ncol=2, nrow=5, common.legend = TRUE, legend="none")
@@ -113,4 +113,5 @@ mplot
 ### Save matrix plot
 ggsave(plot=mplot, filename = paste0("Post_MCMC_Analysis/Plots/MCMC_results_matrix", format(Sys.time(), "%Y%m%d_%H%M%S_"),".jpeg"), width = 6, height = 10 , dpi = 1000)
 
-           
+
+         

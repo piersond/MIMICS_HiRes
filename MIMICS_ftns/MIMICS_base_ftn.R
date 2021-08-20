@@ -251,6 +251,7 @@ MIMICS1 <- function(df){
                        MIMLIT = MIMLIT,
                        MIM_CO = MIM_CO,
                        desorb = as.numeric(desorb),
+                       SOMpTOv = 1/(as.numeric(desorb)*24*365), #convert from per hr to per yr
                        LITm = table[1] * depth *1e4 / 1e6, #convert kgC/m2 from mgC/cm3 (0-30 cm) 
                        LITs = table[2] * depth *1e4 / 1e6,
                        MICr = table[3] * depth *1e4 / 1e6,
