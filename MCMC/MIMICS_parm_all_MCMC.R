@@ -157,7 +157,7 @@ for(i in 1:MIM_runs) {
     # ONLY USEFUL IF COMPUTATIONAL POWER IS LIMITED, comment out if not
     #######################################################################
     # Set walk rate
-    walk_rt = 1.5 # Set the parameter range min to the current value dived by
+    walk_rt = 2 # Set the parameter range min to the current value dived by
     # this number, and the max to the current value multiplied
     # by this number
     
