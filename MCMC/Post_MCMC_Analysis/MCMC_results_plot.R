@@ -117,7 +117,13 @@ ggsave(plot=mplot, filename = paste0("Post_MCMC_Analysis/Plots/MCMC_results_matr
 
 # Alternate plot code
 
+#Isolate a specific MCMC run
 MCMC_out <- read.csv(paste0("Output/",filenames[1]), as.is=T)
+
+#Add an end row
+improve_steps <- MCMC_out %>% filter(improve == 1)
+MCMC_out <- rbind(MCMC_out, improve_steps[nrow(improve_steps),])
+MCMC_out$iter[nrow(MCMC_out)] <- nrow(MCMC_out)
 
 pRMSE <- ggplot(MCMC_out, aes(x=iter, y=RMSE)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none") +ylim(1,5)
 pr2 <- ggplot(MCMC_out, aes(x=iter, y=r2)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
@@ -131,6 +137,11 @@ pKslope_x <- ggplot(MCMC_out, aes(x=iter, y=Kslope_x)) + geom_line(color="grey50
 pKint_x <- ggplot(MCMC_out, aes(x=iter, y=Kint_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
 
 grid.arrange(pRMSE, pr2, pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKslope_x, ncol = 2)
+
+#save plot
+png(file="C:/github/MIMICS_HiRes/Figures/Fig3_SI_MC_walks/MC_walk_example.png", width=5000, height=6000, units="px", res=600)
+grid.arrange(pRMSE, pr2, pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKslope_x, ncol = 2)
+dev.off()
 
 
          
