@@ -2,13 +2,17 @@ library(tidyverse)
 library(furrr)
 library(purrr)
 
-setwd("C:/github/MIMICS_HiRes")
+# Set working drive if not running on HPC 
+if(.Platform$OS.type == "unix") {
+} else {
+  setwd("C:/github/MIMICS_HiRes")  
+}
 
 # Bring in MIMICS ftn
 source("MIMICS_ftns/MIMICS_base_ftn.R")
 
 # Load map forcing data (output from MIMICS_map_data_generator.R)
-frc_data <- readRDS("Mapping/MIMICS_map_forcing_data.rds")
+frc_data <- readRDS("Mapping/Map_data_in/MIMICS_map_forcing_data.rds")
 
 ######################################
 # Run a scenario, or comment out
@@ -21,24 +25,24 @@ frc_data <- readRDS("Mapping/MIMICS_map_forcing_data.rds")
 
 
 ########################################
-# Apply rate curve brute force multipliers
+# Apply parameter multipliers
 #######################################
 ### Use option 1 or 2, not both (comment out code for option not used)
 
 ##########################################
 # OPTION 1
 ### Manually set parameters for MIMICS run
-pset <- data.frame(
-          id = 38489, #set an ID# for tracking 
-          Vslope_x = 2.891815932,
-          Vint_x = 1.767005898,
-          Kslope_x = 1.003510074,
-          Kint_x = 2.3084668,
-          CUE_x = 0.978538555,
-          Tau_x = 1.025889712,
-          desorb_x = 1.891280193,
-          fPHYS_x = 2.74531248
-)
+# pset <- data.frame(
+#           id = 38489, #set an ID# for tracking 
+#           Vslope_x = 2.891815932,
+#           Vint_x = 1.767005898,
+#           Kslope_x = 1.003510074,
+#           Kint_x = 2.3084668,
+#           CUE_x = 0.978538555,
+#           Tau_x = 1.025889712,
+#           desorb_x = 1.891280193,
+#           fPHYS_x = 2.74531248
+# )
 
 
 ###########################################
@@ -47,13 +51,13 @@ pset <- data.frame(
 # OPTION 2
 ### If making many maps from sets of MIMICS parameters
 
-## Load a set of parameters for MIMICS
-# param_sets <- readRDS("MIMICS_MC_parms_for_maps.rds")
-# param_sets$pID <- seq(1,nrow(param_sets),1)
+# Load a set of parameters for MIMICS
+param_sets <- read.csv("Mapping/Map_data_in/RC_MIM_param_combos_RMSE_less2.csv", as.is=T)
+param_sets$pID <- seq(1,nrow(param_sets),1)
 
-## Manually select parameter set
-# pest_num <- 1  #<-- enter number for desired parameter set (row #)
-# pset <- param_sets[pset_num,]
+# Manually select parameter set
+pset_num <- 1  #<-- enter number for desired parameter set (row #)
+pset <- param_sets[pset_num,]
 ###########################################
 
 
@@ -110,12 +114,12 @@ gc()
 #################################################
 
 #Write raw map output
-saveRDS(MIM_Map_data, "Mapping/Map_data/MIMICS_map_data.rds")
+saveRDS(MIM_Map_data, paste0("Mapping/Map_data_out/MIMICS_map_data_pset", pset_num, ".rds"))
 
 # join to raster frac data frame
 MIM_Map_data_full <- merge(frc_data, MIM_Map_data, by.x = "Site",
                            by.y = "Site", all.x = TRUE, all.y = FALSE)
 #save full map dataset
-saveRDS(MIM_Map_data_full, "Mapping/Map_data/MIMICS_map_data_full.rds")
+saveRDS(MIM_Map_data_full, paste0("Mapping/Map_data_out/MIMICS_map_data_full_pset", pset_num, ".rds"))
 
 
