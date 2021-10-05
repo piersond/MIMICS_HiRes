@@ -35,7 +35,7 @@ stode_jitter <- function(stode_y = Ty, stode_time = 1e6, stode_fun = RXEQ, stode
       #print(stode_y['MIC_2'])
     }
     
-    if(run_i > 3) {
+    if(run_i > 5) {
       success <- TRUE
       #print(paste0("Jitter cap: ", as.character(run_i)))
     }
@@ -128,18 +128,19 @@ MIMICS1 <- function(df){
   ANPP <-  (ANPP+400)/2
   
   #prevent negative ANPP
-  # if(ANPP < 1){
-  #   ANPP <- 1.19999
-  #   print("Fixing ANPP < 1")
-  #  }
+  if(ANPP < 1){
+    ANPP <- 1.19999
+    print("Fixing ANPP < 1")
+   }
   
   ### Bring in CLAY value, convert from percent to decimal
   fCLAY      <- df$CLAY/100
+  
   # Prevent clay < 3%
-  # if(fCLAY < 0.02) {
-  #   fCLAY <- 0.02
-  #   print("Low clay value set to 2%")
-  # }
+  if(fCLAY < 0.02) {
+    fCLAY <- 0.02
+    print("Low clay value set to 2%")
+  }
   
   ### Bring in TSOI value
   TSOI       <- df$TSOI

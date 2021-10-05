@@ -7,7 +7,8 @@ library(rgdal)
 setwd("C:/github/MIMICS_HiRes")
 
 # Load map data (output from MIMICS_soil_C_mapper.R)
-MIM_Map_data_full <- readRDS("Mapping/Map_data/MIMICS_map_data_full.rds")
+MIM_Map_data_full <- readRDS("Mapping/Map_data_out/MIMICS_map_data_full_pset1.rds")
+
 
 ##################################################
 # Load MIMICS forcing data rasters
@@ -21,6 +22,23 @@ estGPP <- raster(paste0(raster_path,"MSAVI_estGPP.tif"))
 estTSOI <- raster(paste0(raster_path,"tsoi_est2.tif"))
 estCLAY <- raster(paste0(raster_path,"RCrk_estClay.tif"))
 estLIGN <- raster(paste0(raster_path,"RCrk_estLigN.tif"))
+
+
+raster_n <- ncell(estGPP)
+
+raster_frc <- data.frame(Site=seq(1,raster_n),
+                         pGPP=as.numeric(getValues(estGPP)),
+                         TSOI=as.numeric(getValues(estTSOI)),
+                         CLAY=as.numeric(getValues(estCLAY)),
+                         lig_N=as.numeric(getValues(estLIGN)))
+
+
+#################################################
+# Fill in NA rows for new raster data
+#################################################
+MIM_Map_data_full <- merge(raster_frc, MIM_Map_data_full, by.x = "Site",
+                           by.y = "Site", all.x = TRUE, all.y = FALSE)
+
 
 #################################################
 # Build rasters from map data

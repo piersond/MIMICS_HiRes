@@ -5,7 +5,8 @@ setwd("C:/github/MIMICS_HiRes")
 source("MIMICS_ftns/MIMICS_base_ftn.R")
 
 # Bring in parameters
-parm_df <- read.csv("MC/Output/best_MC_Pcombo_20210819.csv")
+parm_df <- read.csv("MC/Output/RC_MIM_param_combos_RMSE_less2.csv")
+parm_df <- parm_df[1,]
 
 # Set parameter values
 Vslope = Vslope * parm_df$Vslope_x
@@ -20,11 +21,11 @@ fPHYS_MULT = parm_df$fPHYS_x
 ##############################################
 # Full forcing dataset run
 ##############################################
-data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_validation.csv", as.is=T)
+data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
 
 MIMrun <- data %>% split(1:nrow(data)) %>% map(~ MIMICS1(df=.)) %>% bind_rows()
 MIMrun <- data %>% cbind(MIMrun %>% select(-Site, -TSOI))
 
 # Save MIMICS run data
-#write.csv(MIMrun, "Figures/Fig1_Cal_vs_Val/MIMrun_VAL_bestP.csv")
+write.csv(MIMrun, "Figures/Fig1_Cal_vs_Val/MIMrun_CAL_bestP.csv")
 

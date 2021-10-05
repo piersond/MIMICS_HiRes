@@ -56,7 +56,7 @@ param_sets <- read.csv("Mapping/Map_data_in/RC_MIM_param_combos_RMSE_less2.csv",
 param_sets$pID <- seq(1,nrow(param_sets),1)
 
 # Manually select parameter set
-pset_num <- 1  #<-- enter number for desired parameter set (row #)
+pset_num <- 2  #<-- enter number for desired parameter set (row #)
 pset <- param_sets[pset_num,]
 ###########################################
 
