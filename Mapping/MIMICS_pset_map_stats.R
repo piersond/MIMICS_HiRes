@@ -2,213 +2,72 @@ library(raster)
 library(rgdal)
 library(RColorBrewer)
 library(ggplot2)
-library(ggpubr)
 library(prettymapr)
 library(viridis)
-library(dplyr)
 
 #set working directory
 setwd("C:/github/MIMICS_HiRes")
 
-################### 
-# Load Rasters
-###################
-forcing_rasters_path <- "C:/Users/Derek/Google Drive/RCrk/GIS/MIMICS_rasters/"
-GPP <- raster(paste0(forcing_rasters_path,"MSAVI_estGPP.tif"))
-TSOI <- raster(paste0(forcing_rasters_path,"tsoi_est2.tif"))
-CLAY <- raster(paste0(forcing_rasters_path,"RCrk_estClay.tif"))
-LIGN <- raster(paste0(forcing_rasters_path,"RCrk_estLigN.tif"))
-DEM <- raster(paste0(forcing_rasters_path,"DEM_extract1.tif"))
-ASPECT <- raster(paste0(forcing_rasters_path,"RC_Aspect_Deg.tif"))
-NSEW <- raster(paste0(forcing_rasters_path,"RC_Aspect_NSEW.tif"))
-
-#MIMICS rasters
-SOC <- raster("Figures/Fig4_estSOC_map/estSOC_pset_mean.tif")
-LIT <- raster("Figures/Fig5_C_pool_maps/estLIT_pset_mean.tif")
-MIC <- raster("Figures/Fig5_C_pool_maps/estMIC_pset_mean.tif")
-SOMp <- raster("Figures/Fig5_C_pool_maps/estSOMp_pset_mean.tif")
+### Set path to "pool" rasters
+pool_path = "Mapping/Map_data_out/pset_RCrk_TSOI1_map_data/SOC_rasters"
 
 
-#######################
-# Litter plots
-#######################
-LIT_plot_df <- na.omit(data.frame(LIT = getValues(LIT),
-                      ASPECT = getValues(ASPECT),
-                      NSEW = getValues(NSEW),
-                      DEM = getValues(DEM),
-                      GPP = getValues(GPP) + 400,
-                      TSOI = getValues(TSOI)))
+####################################################
+# Create dataframe with total raster cell sum
+####################################################
+# Find the raster filenames
+pset_pool_rasters <- list.files(pool_path, pattern='\\.tif$')
 
-### Plot 1
-p1 <- ggplot(LIT_plot_df,
-       aes(y=LIT, x=ASPECT)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  xlab("Terrain Aspect") +
-  ylab("MIMICS Litter C (kg m-2)") +
-  scale_fill_viridis(option = "D", direction = 1)
+pset_pool_df <- data.frame(layer=0, sum=0)
 
-### Plot 2
-p2 <- ggplot(LIT_plot_df,
-       aes(y=TSOI, x=ASPECT)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  xlab("Terrain Aspect") +
-  ylab("Mean Annual Soil Temperature (deg C)") +
-  scale_fill_viridis(option = "D", direction = 1)
-
-### Plot 3
-p3 <- ggplot(LIT_plot_df,
-       aes(y=LIT, x=TSOI)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  ylab("MIMICS Litter C (kg m-2)") +
-  xlab("Mean Annual Soil Temperature (deg C)") +
-  scale_fill_viridis(option = "D", direction = 1)
-
-### Plot 4
-p4 <- ggplot(LIT_plot_df,
-       aes(y=LIT, x=GPP/2)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  xlab("Estimated ANPP") +
-  ylab("MIMICS Litter C (kg m-2)") +
-  scale_fill_viridis(option = "D", direction = 1)
-
-png("litC_plots.png", width=6, height=5, units="in", res=600)
-
-ggarrange(ncol=2,
-          nrow=2,
-          p1, p4,
-          p2, p3)
-
-dev.off()
-
-#######################
-# MIC-C plots
-#######################
-MIC_plot_df <- na.omit(data.frame(MIC = getValues(MIC),
-                                  ASPECT = getValues(ASPECT),
-                                  NSEW = getValues(NSEW),
-                                  DEM = getValues(DEM),
-                                  GPP = getValues(GPP) + 400,
-                                  TSOI = getValues(TSOI),
-                                  LIGN = getValues(LIGN),
-                                  CLAY = getValues(CLAY)))
-
-### Plot 1
-p1 <- ggplot(MIC_plot_df,
-             aes(y=MIC, x=ASPECT)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  xlab("Terrain Aspect") +
-  ylab("MIMICS Microbial-C (kg m-2)") +
-  scale_fill_viridis(option = "B", direction = 1)
-
-### Plot 2
-p2 <- ggplot(MIC_plot_df,
-             aes(y=MIC, x=as.character(round(LIGN,1)))) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  #geom_violin() +
-  theme_bw() +
-  xlab("Lignin:N") +
-  ylab("MIMICS Microbial-C (kg m-2)") +
-  scale_fill_viridis(option = "B", direction = 1) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
-### Plot 3
-p3 <- ggplot(MIC_plot_df,
-             aes(y=MIC, x=TSOI)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  ylab("MIMICS Microbial-C (kg m-2)") +
-  xlab("Mean Annual Soil Temperature (deg C)") +
-  scale_fill_viridis(option = "B", direction = 1)
-
-### Plot 4
-p4 <- ggplot(MIC_plot_df,
-             aes(y=MIC, x=GPP/2)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  xlab("Estimated ANPP") +
-  ylab("MIMICS Microbial-C (kg m-2)") +
-  scale_fill_viridis(option = "B", direction = 1)
-
-png("micC_plots.png", width=6, height=5, units="in", res=600)
-
-ggarrange(ncol=2,
-          nrow=2,
-          p1, p4,
-          p2, p3)
-
-dev.off()
+for (j in 1:length(pset_pool_rasters)){
+  tot <- sum(getValues(raster(paste0(pool_path, "/", pset_pool_rasters[j]))), na.rm = T)
+  df <- data.frame(layer=j, sum=tot)
+  pset_pool_df <- rbind(pset_pool_df, df)
+}
 
 
-#######################
-# SOMp plots
-#######################
-SOMp_plot_df <- na.omit(data.frame(SOMp = getValues(SOMp),
-                                  ASPECT = getValues(ASPECT),
-                                  NSEW = getValues(NSEW),
-                                  DEM = getValues(DEM),
-                                  GPP = getValues(GPP) + 400,
-                                  TSOI = getValues(TSOI),
-                                  LIGN = getValues(LIGN),
-                                  CLAY = getValues(CLAY)))
+################################################
+# Get total SOC stocks for comparisons
+################################################
+pset_SOC_rasters <- list.files("Mapping/Map_data_out/estSOC", pattern='\\.tif$')
 
-### Plot 1
-p1 <- ggplot(SOMp_plot_df,
-             aes(y=SOMp, x=ASPECT)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  xlab("Terrain Aspect") +
-  ylab("MIMICS SOMp C (kg m-2)") +
-  scale_fill_viridis(option = "G", direction = 1)
+pset_SOC_df <- data.frame(layer=0, sum=0)
 
-### Plot 2
-p2 <- ggplot(SOMp_plot_df,
-             aes(y=SOMp, x=CLAY)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  xlab("Clay Content (%)") +
-  ylab("MIMICS SOMp C (kg m-2)") +
-  scale_fill_viridis(option = "G", direction = 1)
+for (j in 1:length(pset_SOC_rasters)){
+  tot <- sum(getValues(raster(paste0("Mapping/Map_data_out/estSOC/", pset_SOC_rasters[j]))), na.rm = T)
+  df <- data.frame(layer=j, sum=tot)
+  pset_SOC_df <- rbind(pset_SOC_df, df)
+}
 
-### Plot 3
-p3 <- ggplot(SOMp_plot_df,
-             aes(y=SOMp, x=TSOI)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  ylab("MIMICS SOMp C (kg m-2)") +
-  xlab("Mean Annual Soil Temperature (deg C)") +
-  scale_fill_viridis(option = "G", direction = 1)
 
-### Plot 4
-p4 <- ggplot(SOMp_plot_df,
-             aes(y=SOMp, x=GPP/2)) + 
-  geom_bin2d(bins=200) +
-  #geom_point(alpha=0.5) + 
-  theme_bw() +
-  xlab("Estimated ANPP") +
-  ylab("MIMICS SOMp C (kg m-2)") +
-  scale_fill_viridis(option = "G", direction = 1)
+################################################
+# Calc summary stats
+################################################
 
-png("SOMp_plots.png", width=6, height=5, units="in", res=600)
+# Calc mean and std deviation
+pool_tot_mean <- mean(pset_pool_df$sum[-1]) *10*0.000001 #convert to kg from kg/m2, since each grid cell is 10 m2
+pool_tot_sd <- sd(pset_pool_df$sum[-1]) *10*0.000001     #then from kg to kt
 
-ggarrange(ncol=2,
-          nrow=2,
-          p1, p4,
-          p2, p3)
+# Calc mean and std deviation
+SOC_tot_mean <- mean(pset_SOC_df$sum[-1]) *10*0.000001 #convert to kg from kg/m2, since each grid cell is 10 m2
+SOC_tot_sd <- sd(pset_SOC_df$sum[-1]) *10*0.000001     #then from kg to kt
 
-dev.off()
+# pool proportion of SOC
+pool_prop_df <- data.frame(SOC=pset_SOC_df$sum,
+                          pool=pset_pool_df$sum)[-1,]
+pool_prop_df$poolprop <- pool_prop_df$pool/pool_prop_df$SOC
+  
+mean(pool_prop_df$poolprop)
+sd(pool_prop_df$poolprop)
+
+#SOC diff, [for scenario rasters]
+scen_diff_df <- data.frame(def_SOC=pset_SOC_df$sum,
+                           scen_SOC=pset_pool_df$sum)[-1,]
+scen_diff_df$diff <- scen_diff_df$scen_SOC-scen_diff_df$def_SOC
+
+mean(scen_diff_df$diff)*10*0.000001 
+sd(scen_diff_df$diff)*10*0.000001 
+
+
+
