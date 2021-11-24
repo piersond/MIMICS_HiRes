@@ -57,7 +57,7 @@ plot(estSOC_diff_sd_crop)
 ###################################
 
 # Setup to save plot as png
-png(file="C:/github/MIMICS_HiRes/Figures/Fig6_Scenario maps/TSOI1_estSOC_diff_mn_map.png", width=4000, height=6000, units="px", res=600)
+#png(file="C:/github/MIMICS_HiRes/Figures/Fig6_Scenario maps/TSOI1_estSOC_diff_mn_map.png", width=4000, height=6000, units="px", res=600)
 
 estSOC_diff_mean_crop2 <- estSOC_diff_mean_crop
 estSOC_diff_mean_crop2[estSOC_diff_mean_crop > 0.5] <- 0.5
@@ -83,7 +83,7 @@ addscalebar(plotunit = 'm', widthhint = 0.3, lwd = 1, padin = c(3.3, 0), label.c
 addnortharrow(scale = 0.6, text.col = 'black', cols = c('black', 'black'))
 
 # Close jpeg save
-dev.off()
+#dev.off()
 
 
 ###################################
@@ -91,7 +91,7 @@ dev.off()
 ###################################
 
 # Setup to save plot as png
-png(file="C:/github/MIMICS_HiRes/Figures/Fig6_Scenario maps/TSOI1_estSOC_diff_sd_map.png", width=4000, height=6000, units="px", res=600)
+#png(file="C:/github/MIMICS_HiRes/Figures/Fig6_Scenario maps/TSOI1_estSOC_diff_sd_map.png", width=4000, height=6000, units="px", res=600)
 
 estSOC_diff_sd_crop2 <- estSOC_diff_sd_crop
 estSOC_diff_sd_crop2[estSOC_diff_sd_crop > 2.5] <- 2.5
@@ -116,7 +116,7 @@ addscalebar(plotunit = 'm', widthhint = 0.3, lwd = 1, padin = c(3.3, 0), label.c
 addnortharrow(scale = 0.6, text.col = 'black', cols = c('black', 'black'))
 
 # Close jpeg save
-dev.off()
+#dev.off()
 
 
 

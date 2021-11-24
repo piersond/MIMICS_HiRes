@@ -103,36 +103,39 @@ calc_pool_var <- function(sites, MIM_pool) {
                                summarize(pool_max = max(pool),
                                          pool_min = min(pool),
                                          maxmin_ratio = pool_max/pool_min) 
+  
   pool_var_stats %>% summarize(pool_ratio_mn = mean(maxmin_ratio),
               pool_ratio_sd = sd(maxmin_ratio))
 }
 
+
+# THESE VALUES USED IN RESULTS SECTION
 calc_pool_var(MCf_best$Site, MCf_best$SOMp)
+calc_pool_var(MCf_best$Site, MCf_best$MIMLIT)
+calc_pool_var(MCf_best$Site, MCf_best$MIMMIC/MCf_best$MIMSOC)
 
 ####### MIM_CO avg and std dev
 MCf_best %>% filter(MIM_CO > 0.28) %>% filter(MIM_CO < 4) %>%
-             summarize(mn = mean(MIM_CO),
-                       sd = sd(MIM_CO))
-
-
-MCf_best %>% filter(MIM_CO > 0.28) %>% filter(MIM_CO < 4) %>%
+            #group by sampling location, then get mean and std dev of pool
              group_by(Site) %>% summarize(mn = mean(MIM_CO),
                                           sd = sd(MIM_CO)) %>%
+             #take the overall mean across all the sampling location means
              summarize(all_mn = mean(mn),
                        all_sd = sd(mn))
   
 ###########################################
 
+####### MIMMIC/MIMSOC avg and std dev
+MCf_best %>% 
+  #group by sampling location, then get mean and std dev of pool
+  group_by(Site) %>% summarize(mn = mean(MIMMIC/MIMSOC),
+                               sd = sd(MIMMIC/MIMSOC)) %>%
+  #take the overall mean across all the sampling location means
+  summarize(all_mn = mean(mn),
+            all_sd = sd(mn))
 
-min(MCf_best$MIMLIT)  
-max(MCf_best$MIMLIT)
+###########################################
 
-MIMLIT_rng <- MCf_best %>% group_by(Site) %>% summarize(MIMLIT_range = max(MIMLIT)-min(MIMLIT),
-                                                        MIMLIT_mn = mean(MIMLIT),
-                                                        MIMLIT_sd = sd(MIMLIT)
-                                                        )
-min(MIMLIT_rng$MIMLIT_range)
+ 
 
 
-min(MCf_best$MIMMIC/MCf_best$MIMSOC)*100  
-max(MCf_best$MIMLIT/MCf_best$MIMSOC)*100
