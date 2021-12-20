@@ -2,12 +2,26 @@
 
 ---
 
+
+
 ## Overview
-Process base models are the most viable method for estimating soil C stocks and projecting soil C responses to changing conditions. However, while process model constructs are intentionally simplified versions of real world dynamics, the complexity of model parameterization presents a barrier for wider use by scientific and land management communities. Here, we've addressed that problem by creating a machine learning algorithm for parameterization of the MIMICS model, which has been folded into an automated routine. With the required data input from a user, the routine can parameterize MIMICS, fitting not only bulk SOC to field measures, but also the underlying soil C pools to known or expected ranges. (The parameterization routine is best run on a high performance computing platform, however the computing power required is not overwhelming to the extent that the routine cannot be run on most modern desktop computers). 
+Process-based models, such as the Microbial Mineral Carbon Stabilization (MIMICS) model, are widely used for estimating soil carbon (C) stocks and projecting soil C responses to changing conditions. However, the complexity of model parameterization presents a common roadblock for users of the model. Here, I've addressed this problem by creating a machine learning algorithm for parameterization of the MIMICS model. With the required forcing and calibration data, users may run the algorithm to find the parameters that best align model estimates of bulk SOC with field measures, while also ensuring underlying soil C pools fit within known or expected ranges. 
 
-We’ve packaged the parameterization algorithm with a spatial data processing routine that is capable of producing spatial estimate maps of 0-30 cm soil C, litter C, microbial C, and protected C down to resolutions of 10 m2. The routine can also project and map the sensitivity of soil C stocks and the underlying C pools to changes in environmental conditions.  
+The repository also includes scripted spatial extrapolation algorithms to produce continuous-spatial maps of MIMICS estimates of soil C, litter C, microbial C, and protected C based on input rasters pertianing to the required model forcing data. The scripts are also capable of mapping the projected response of soil C stocks and the underlying C pools to changes in environmental conditions.  
 
-## Basic steps for reproducing analyses and MIMICS model products
+The parameterization algorithm is best run on a high performance computing (HPC) platform. However, the computing power required is not overwhelming to the extent that the routine cannot be run on most modern desktop computers.
+
+</br>
+
+#### Required forcing data for the MIMICS model:
+1) Annual net primary productivity (ANPP)
+2) Mean annual soil temperature (TSOI)
+3) Soil clay content
+4) Dominant litter type lignin:N ratio
+
+</br>
+
+## General steps for reproducing analyses and MIMICS model products
 
 ### 1. Generate dataset of 0-30 cm soil C stocks.
 
