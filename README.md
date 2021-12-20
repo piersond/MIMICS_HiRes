@@ -15,11 +15,11 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 </br>
 
 #### Required data for running the MIMICS model:
-1) Annual net primary productivity (ANPP)
-2) Mean annual soil temperature (TSOI)
-3) Soil clay content
-4) Dominant litter type lignin:N ratio
-!) Field measures of SOC stocks (required for model calibration)
+1) Annual net primary productivity (ANPP).
+2) Mean annual soil temperature (TSOI).
+3) Soil clay content (CLAY).
+4) Dominant litter type lignin:N ratio (LIG_N).
+5) Field measures of SOC stocks also required for model calibration.
 
 *Point-based data is used for model parameterization.* 
 *Continuous raster data is required for spatial estimates and projections.*
