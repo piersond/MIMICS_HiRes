@@ -58,7 +58,7 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 
  * Useful for obtaining a single best-fit parameterization. See MCMC folder Readme for instructions.
  * Note: MCMC algorithm has been found to return different results in separate runs using the same forcing data (equifinality). See manuscript. 
- * Note: Using 31 cores on the ISU Supercomputer, and a calibration dataset with ~50 points, it takes ~2 hours to run the MCMC for 5000*3 iterations
+ * Note: Using 31 cores on the Idaho State University HPC platform, and a calibration dataset with ~50 points, it takes ~2 hours to run the MCMC for 5000x3 iterations.
 
 ### 3. Analyze parameterization space (i.e. parametric uncertainty) using a Monte Carlo simulation.
 
