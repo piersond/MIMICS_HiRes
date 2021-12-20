@@ -3,8 +3,9 @@
 ---
 
 
-
 ## Overview
+*Repository supports manuscript submitted to Nature Communications for publication. Link to manuscript will be provided following official publication.*
+
 Process-based models, such as the Microbial Mineral Carbon Stabilization (MIMICS) model, are widely used for estimating soil carbon (C) stocks and projecting soil C responses to changing conditions. However, the complexity of model parameterization presents a common roadblock for users of the model. Here, I've addressed this problem by creating a machine learning algorithm for parameterization of the MIMICS model. With the required forcing and calibration data, users may run the algorithm to find the parameters that best align model estimates of bulk SOC with field measures, while also ensuring underlying soil C pools fit within known or expected ranges. 
 
 The repository also includes scripted spatial extrapolation algorithms to produce continuous-spatial maps of MIMICS estimates of soil C, litter C, microbial C, and protected C based on input rasters pertianing to the required model forcing data. The scripts are also capable of mapping the projected response of soil C stocks and the underlying C pools to changes in environmental conditions.  
