@@ -30,7 +30,7 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 
 **Each folders contains script descriptions and instructions. Scripts also include inline comments.**
 
-**Figures:** Scripts and images used for associated manuscript figures. </br>
+**Figures:** Scripts, data and images used for associated manuscript figures. </br>
 
 **Helpful scripts:** Miscellaneous scripts used for MIMICS runs, mapping and summary statistics. <br/>
 
