@@ -38,7 +38,7 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 
 **MCMC:** Scripts for running a Markov Chain Monte Carlo to find the best-fit MIMICS parameters for a given set of calibration data.<br/>
 
-**MIMICS_ftns:** Functions used to run MIMICS. Model matches the published modle code [here](https://github.com/wwieder/MIMICS/tree/sandbox). <br/>
+**MIMICS_ftns:** Functions used to run MIMICS. Model matches the published model code [here](https://github.com/wwieder/MIMICS/tree/sandbox). <br/>
 
 **Mapping:** Scripts for the creating continuous maps of MIMICS estimates from raster forcing data.</br>
 
