@@ -21,8 +21,30 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 4) Dominant litter type lignin:N ratio
 !) Field measures of SOC stocks (required for model calibration)
 
-* Point-based data is used for model parameterization. 
-* Continuous raster data is required for spatial estimates and projections.
+*Point-based data is used for model parameterization.* 
+*Continuous raster data is required for spatial estimates and projections.*
+
+</br>
+
+## Instructions
+
+**Each folders contains script descriptions and instructions. Scripts also include many useful comments.**
+
+**Figures:** Scripts and images used for associated manuscript figures. </br>
+
+**Helpful scripts:** Miscellaneous scripts used for MIMICS runs, mapping and summary statistics. <br/>
+
+**MC:** Script for running a Monte Carlo simulation with randomized MIMICS parameters.<br/>
+
+**MCMC:** Scripts for running a Markov Chain Monte Carlo to find the best-fit MIMICS parameters for a given set of calibration data.<br/>
+
+**MIMICS_ftns:** Functions used to run MIMICS. Model matches the published modle code [here](https://github.com/wwieder/MIMICS/tree/sandbox). <br/>
+
+**Mapping:** Scripts for the creating continuous maps of MIMICS estimates from raster forcing data.</br>
+
+**RCrk_Data_Aggregation:** Scripts used to collect data for modeling and mapping SOC stocks across the Reynolds Creek Experimental Watershed and Critical Zone Observatory (RCEW-CZO).</br>
+
+**RCrk_Modelling_Data:** Specific forcing data .csv files used for original project and associated publication.</br>
 
 </br>
 
