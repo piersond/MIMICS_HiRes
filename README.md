@@ -4,7 +4,7 @@
 
 
 ## Overview
-*Repository supports manuscript submitted to Nature Communications for publication. Link to manuscript will be provided following official publication.*
+*Repository supports manuscript in review for publication. Link to manuscript will be provided following official publication.*
 
 Process-based models, such as the Microbial Mineral Carbon Stabilization (MIMICS) model, are widely used for estimating soil carbon (C) stocks and projecting soil C responses to changing conditions. However, the complexity of model parameterization presents a common roadblock for users of the model. Here, I've addressed this problem by creating a machine learning algorithm for parameterization of the MIMICS model. With the required forcing and calibration data, users may run the algorithm to find the parameters that best align model estimates of bulk SOC with field measures, while also ensuring underlying soil C pools fit within known or expected ranges. 
 
@@ -48,9 +48,9 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 
 </br>
 
-## General steps for reproducing analyses and MIMICS model products
+## General steps used for analyses and modelling 
 
-### 1. Collect forcing data for the  model and coressponding field measures of 
+### 1. Collect forcing data for the model and coressponding field measures of 
 
   * Harmonized soil data was originally downloaded from the Reynolds Creek Experimental Watershed and Critical Zone Observatory Database at http://data.reynoldscreekczo.org/shiny/RCSoDaH/. The database (.rds) was then processed in three steps (R scripts) to aggregate the available data into single values pertaining to the 0-30 cm stocks of SOC. See RCrk_Data_Aggregation folder.
 
@@ -62,11 +62,15 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 
 ### 3. Analyze parameterization space (i.e. parametric uncertainty) using a Monte Carlo simulation.
 
- * Useful for determining the how many viable model parameterizations exist for specific calibration dataset. See MC folder for further instructions. 
+ * Useful for determining the viable model parameterizations space for a specific calibration dataset. See MC folder for further instructions. 
 
 ### 4. Create spatial maps from the MIMICS model 
 
  * Once a suitable model parameterization is found, continuous rasters coinciding with the calibration dataset can be used to generate continuous MIMICS estimates and projections. See Mapping folder for additional information.
+ 
+ * Repeating the spatial map creation process for each member of a sample of the viable parameterizations found from the Monte Carlo simulation allows for mapping parametric uncertainty of model estimates by calculating the standard deviation of the raster cells.
+
+* Idealized scenarios of soil C response to change are performed by modifying the forcing data prior to running the model.
 
 
 
