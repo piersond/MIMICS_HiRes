@@ -50,16 +50,24 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 
 ## General steps for reproducing analyses and MIMICS model products
 
-### 1. Generate dataset of 0-30 cm soil C stocks.
+### 1. Collect forcing data for the  model and coressponding field measures of 
 
-  * Harmonized soil data was originally downloaded from the Reynolds Creek Experimental Watershed and Critical Zone Observatory Database at http://data.reynoldscreekczo.org/shiny/RCSoDaH/. The database (.rds) was then processed in three steps (R scripts) to aggregate the available data into single values pertaining to the 0-30 cm stocks of SOC.
+  * Harmonized soil data was originally downloaded from the Reynolds Creek Experimental Watershed and Critical Zone Observatory Database at http://data.reynoldscreekczo.org/shiny/RCSoDaH/. The database (.rds) was then processed in three steps (R scripts) to aggregate the available data into single values pertaining to the 0-30 cm stocks of SOC. See RCrk_Data_Aggregation folder.
 
-### 2. Find "best-fit" model parameters using a MCMC approach
+### 2. Find "best-fit" model parameters using a Markov Chain Monte Carlo algorithm.
 
+ * Useful for obtaining a single best-fit parameterization. See MCMC folder Readme for instructions.
+ * Note: MCMC algorithm has been found to return different results in separate runs using the same forcing data (equifinality). See manuscript. 
  * Note: Using 31 cores on the ISU Supercomputer, and a calibration dataset with ~50 points, it takes ~2 hours to run the MCMC for 5000*3 iterations
 
-### 3. Find "best-fit" model parameters using a MC approach
+### 3. Analyze parameterization space (i.e. parametric uncertainty) using a Monte Carlo simulation.
 
-### 4. Using best-fit parameterization, create spatial maps from the MIMICS model 
+ * Useful for determining the how many viable model parameterizations exist for specific calibration dataset. See MC folder for further instructions. 
+
+### 4. Create spatial maps from the MIMICS model 
+
+ * Once a suitable model parameterization is found, continuous rasters coinciding with the calibration dataset can be used to generate continuous MIMICS estimates and projections. See Mapping folder for additional information.
+
+
 
    
