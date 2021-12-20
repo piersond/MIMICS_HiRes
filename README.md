@@ -26,9 +26,9 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 
 </br>
 
-## Instructions
+## Contents
 
-**Each folders contains script descriptions and instructions. Scripts also include many useful comments.**
+**Each folders contains script descriptions and instructions. Scripts also include inline comments.**
 
 **Figures:** Scripts and images used for associated manuscript figures. </br>
 
