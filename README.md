@@ -1,6 +1,5 @@
 # MIMICS_HiRes
 
-##### Cite this code: [![DOI](https://zenodo.org/badge/389787554.svg)](https://zenodo.org/badge/latestdoi/389787554)
 ---
 
 
@@ -73,5 +72,7 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 * Idealized scenarios of soil C response to change are performed by modifying the forcing data prior to running the model.
 
 
+---
+##### Cite this code: [![DOI](https://zenodo.org/badge/389787554.svg)](https://zenodo.org/badge/latestdoi/389787554)
 
    
