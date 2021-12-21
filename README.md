@@ -1,5 +1,6 @@
 # MIMICS_HiRes
 
+##### Cite this code: [![DOI](https://zenodo.org/badge/389787554.svg)](https://zenodo.org/badge/latestdoi/389787554)
 ---
 
 
@@ -12,7 +13,6 @@ The repository also includes scripted spatial extrapolation algorithms to produc
 
 The parameterization algorithm is best run on a high performance computing (HPC) platform. However, the computing power required is not overwhelming to the extent that the routine cannot be run on most modern desktop computers.
 
-</br>
 
 #### Required data for running the MIMICS model:
 1) Annual net primary productivity (ANPP).
@@ -21,7 +21,7 @@ The parameterization algorithm is best run on a high performance computing (HPC)
 4) Dominant litter type lignin:N ratio (LIG_N).
 5) Field measures of SOC stocks also required for model calibration.
 
-*Point-based data is used for model parameterization.* 
+*Point-based data is used for model parameterization.* </br>
 *Continuous raster data is required for spatial estimates and projections.*
 
 </br>
