@@ -82,8 +82,8 @@ curr_cost <- 3.5 #RMSE value to improve upon
 #Set trackers
 iters_wo_improve = 0
 
-#Set number of iterations (3 trials are nested within each run)
-MIM_runs <- 20
+#Set number of iterations for each parameter proposal 
+MIM_runs <- 200
 
 # Send progress statement to console
 print(paste0("Running ", as.character(MIM_runs), " MCMC iterations"))
@@ -159,7 +159,7 @@ for(i in 1:MIM_runs) {
         # ONLY USEFUL IF COMPUTATIONAL POWER IS LIMITED, comment out if not
         #######################################################################
         # Set walk rate
-        walk_rt = 2 # Set the parameter range min to the current value dived by
+        walk_rt = 2 # Set the parameter range min to be the current value divided by
                       # this number, and the max to the current value multiplied
                       # by this number
 

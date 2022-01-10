@@ -64,7 +64,7 @@ plot(estSOC_range_crop)
 save_path <- "Figures/Fig4_estSOC_map/"
 
 writeRaster(estSOC_mean_crop, paste0(save_path, "estSOC_pset_mean.tif"), options=c('TFW=YES'))
-
+writeRaster(estSOC_sd_crop, paste0(save_path, "estSOC_pset_sd.tif"), options=c('TFW=YES'))
 
 
 ###################################

@@ -62,7 +62,7 @@ my_theme <- theme_bw() +
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         panel.border = element_blank(),
-        panel.background = element_blank())#+
+        panel.background = element_blank())# +
   #theme(panel.background = element_blank()) + 
   #theme(strip.background = element_blank()) +
   #theme(strip.placement = "outside") +
@@ -76,8 +76,9 @@ pcols <- colfunc(length(names))
 colfunc2 <-colorRampPalette(c("#d54813","#f73c00","#850000"))
 pcols2 <- colfunc2(length(names))
 
+
 pRMSE <- ggplot(MCMC, aes(x=Iteration, y=RMSE, colour=factor(ID))) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
-  scale_color_manual(values = pcols2 ,guide = guide_legend(nrow=2))# + ylim(1,3.5) 
+  scale_color_manual(values = pcols2 ,guide = guide_legend(nrow=2))# + xlim(0, 5000) 
 
 pr2 <- ggplot(MCMC, aes(x=Iteration, y=r2, color=ID)) + geom_line(alpha=0.5, size=1.3) + geom_point(size=1.5, alpha=0.8, shape=16) + my_theme +
   scale_color_manual(values = pcols2 ,guide = guide_legend(nrow=2))# + ylim(0.5, 1) 
@@ -125,6 +126,9 @@ improve_steps <- MCMC_out %>% filter(improve == 1)
 MCMC_out <- rbind(MCMC_out, improve_steps[nrow(improve_steps),])
 MCMC_out$iter[nrow(MCMC_out)] <- nrow(MCMC_out)
 
+#Trim down iterations to simplify plot
+MCMC_out <- MCMC_out %>% filter(iter < 50001)
+
 pRMSE <- ggplot(MCMC_out, aes(x=iter, y=RMSE)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none") +ylim(1,5)
 pr2 <- ggplot(MCMC_out, aes(x=iter, y=r2)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
 pTau_x <- ggplot(MCMC_out, aes(x=iter, y=Tau_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
@@ -139,7 +143,7 @@ pKint_x <- ggplot(MCMC_out, aes(x=iter, y=Kint_x)) + geom_line(color="grey50", a
 grid.arrange(pRMSE, pr2, pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKslope_x, ncol = 2)
 
 #save plot
-png(file="C:/github/MIMICS_HiRes/Figures/Fig3_SI_MC_walks/MC_walk_example.png", width=5000, height=6000, units="px", res=600)
+png(file="C:/github/MIMICS_HiRes/MC_walk_plot.png", width=5000, height=6000, units="px", res=600)
 grid.arrange(pRMSE, pr2, pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKslope_x, ncol = 2)
 dev.off()
 
