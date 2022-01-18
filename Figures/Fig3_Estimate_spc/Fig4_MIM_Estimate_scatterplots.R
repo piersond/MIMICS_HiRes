@@ -73,7 +73,7 @@ p6 <- ggplot(MCf_best, aes(x=SOC,y=1/(desorb*24*365))) + geom_point(color="grey5
   ylab(expression(paste("SOMp Turnover (yr)")))
 
 
-#png(file="Figures/Fig3_Estimate_spc/Fig3_Estimate_Space3.png", width=4000, height=6000, units="px", res=600)
+png(file="Figures/Fig3_Estimate_Space3.png", width=4000, height=6000, units="px", res=600)
 
 ggarrange(p1 + rremove("xlab"),
           p4 + rremove("xlab"),
@@ -90,7 +90,7 @@ ggarrange(p1 + rremove("xlab"),
           hjust = c(-5.9, -5.5, -5.5, -5.5, -6, -6.5),
           align = "hv",
           legend = "none")
-#dev.off()
+dev.off()
 
 # Save data
 #write.csv(MCf_best, "MIMout_for_ensemble.csv")
