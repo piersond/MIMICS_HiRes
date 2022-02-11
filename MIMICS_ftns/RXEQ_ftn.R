@@ -4,11 +4,6 @@ library(boot)
 #REVERSE MODEL 
 RXEQ <- function(t, y, pars) {
   
-  #debug
-  #y = Ty 
-  #t = 1e6 
-  #pars = Tpars
-  
   with (as.list(c(y, pars)),{
     
     #Flows to and from MIC_1
