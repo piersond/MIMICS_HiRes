@@ -1,10 +1,12 @@
 ## Set working drive
 #setwd("C:/github/MIMICS_HiRes")
+setwd("C:/github/MIMICS_HiRes/MIMICS_ftns")
 
 #Libraries
 library(rootSolve)
 #library(boot)
 library(ggplot2)
+library(ggpubr)
 #library(tidyverse)
 #library(Metrics) 
 #library(parallel)
@@ -14,7 +16,6 @@ library(ggplot2)
 #library(gridExtra)
 
 #bring in RXEQ function
-setwd("C:/github/MIMICS_HiRes/MIMICS_ftns")
 source("RXEQ_ftn.R")
 
 ########################################
@@ -255,6 +256,7 @@ MIMout <- MIMICS1(df[1,])
 # MIMrun <- data %>% split(1:nrow(data)) %>% map(~ MIMICS1(df=.)) %>% bind_rows()
 # MIMrun <- data %>% cbind(MIMrun %>% select(-Site, -TSOI))
 
+
 ############
 # Plots
 ###########
@@ -275,7 +277,8 @@ plot_SOM_MIC <- ggplot(MIMout, aes(SOMc, x=DAY, color="SOMc")) + geom_line(size=
   theme_bw() +
   ylab("Microbial and soil C") +
   xlab("Incubation Time (days)") +
-  labs(color = "C Pool")
+  labs(color = "C Pool") +
+  ylim(0, 2.4)
 
 # CO2 fraction
 plot_CO2 <- ggplot(MIMout, aes(y=rowSums(MIMout[,10:11])/rowSums(MIMout[,3:11]), 
@@ -285,8 +288,8 @@ plot_CO2 <- ggplot(MIMout, aes(y=rowSums(MIMout[,10:11])/rowSums(MIMout[,3:11]),
   xlab("Incubation Time (days)") +
   labs(color = "C Pool")
 
-library(ggpubr)
 
+# Build a panel plot
 ggarrange(plot_LIT, plot_SOM_MIC, plot_CO2,
           nrow=3,
           ncol=1)
