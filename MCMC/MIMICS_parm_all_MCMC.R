@@ -85,10 +85,10 @@ curr_p <- data.frame(Vslope_x = 1,
 curr_cost <- 0.5 #RMSE value to improve upon
 
 #Set trackers
-iters_wo_improve = 0
+iters_wo_improve = 1
 
 #Set number of iterations (3 trials are nested within each run)
-MIM_runs <- 100
+MIM_runs <- 1000
 
 # Send progress statement to console
 print(paste0("Running ", as.character(MIM_runs), " MCMC iterations"))
@@ -152,20 +152,25 @@ for(i in 1:MIM_runs) {
     curr_p <- test_p
     curr_cost <- cost
     iter_out$improve <- 1
-    iters_wo_improve <- 0
+    iters_wo_improve <- 1
     
     # Print to console
     print(paste0("MINIMIZED COST TO ", curr_cost))
     
+  } else {
     ## Walk proposal distributions 
     # ONLY USEFUL IF COMPUTATIONAL POWER IS LIMITED, comment out if not
     #######################################################################
-    # Set walk rate
-    walk_rt = 1.05 + (iters_wo_improve/100) 
+    #update tracker for number of iterations without improvement
+    iters_wo_improve <- iters_wo_improve + 1
     
-    # Set max walk rate
-    if(walk_rt > 3){
-      walk_rt <- 3
+    # Set walk rate
+    # Use constant, or slowly expand distributions over many iterations without improvement
+    walk_rt = 1 + iters_wo_improve/100 # using iters_wo_improve increases proposal range if no improvement is found  
+    
+    # Set max walk rate to keep from exploding proposal distributions
+    if(walk_rt > 100){
+      walk_rt <- 100
     }
     
     # Set the parameter range min to the current value divided by
@@ -198,31 +203,16 @@ for(i in 1:MIM_runs) {
     # p_rng[8,2] <- iter_out$fPHYS_x / walk_rt # fPHYS min
     # p_rng[8,3] <- iter_out$fPHYS_x +(iter_out$fPHYS_x-(iter_out$fPHYS_x/walk_rt)) # fPHYS max
 
-    p_rng[9,2] <- iter_out$VMAX_x / walk_rt # VMAX min
-    p_rng[9,3] <- iter_out$VMAX_x +(iter_out$VMAX_x-(iter_out$VMAX_x/walk_rt)) # VMAX max
+    p_rng[9,2] <- curr_p$VMAX_x / walk_rt # VMAX min
+    p_rng[9,3] <- curr_p$VMAX_x +(curr_p$VMAX_x-(curr_p$VMAX_x/walk_rt)) # VMAX max
     
-    print(p_rng[9,2])
-    print(p_rng[9,3])
-    
-    
-    p_rng[10,2] <- iter_out$KM_x / walk_rt # KM min
-    p_rng[10,3] <- iter_out$KM_x +(iter_out$KM_x-(iter_out$KM_x/walk_rt)) # KM max    
-    
-    
-  } else {
-    #update tracker for number of iterations without improvement
-    iters_wo_improve <- iters_wo_improve + 1
-    
-    # Slowly tighten or expand distributions when, over many iterations,
-    # no RMSE improvement is found
-    #######################################################
-    # Would such a process be an improvement?
+    p_rng[10,2] <- curr_p$KM_x / walk_rt # KM min
+    p_rng[10,3] <- curr_p$KM_x +(curr_p$KM_x-(curr_p$KM_x/walk_rt)) # KM max    
     
   }
   
   # Export MCMC data
   MCMC_out <- rbind(MCMC_out, iter_out)
-    
   
 }
 
@@ -241,13 +231,15 @@ nbrOfWorkers()
 options(digits=5)
 options(scipen=10000)
 
-pCOST <- ggplot(MCMC_out, aes(x=iter, y=cost)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="dark red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="black", size=3) + theme_minimal() +theme(legend.position = "none") +
+# Create plots for panel plot
+pCOST <- ggplot(MCMC_out, aes(x=iter, y=cost)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="dark red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="dark red", size=3) + theme_minimal() +theme(legend.position = "none") +
           labs(title="TARGET: Total respired CO2 equal to 10% of total C", subtitle=paste0("Final diff from target = ", round(min(MCMC_out$cost), 5)))
 pVMAX <- ggplot(MCMC_out, aes(x=iter, y=VMAX_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="dark blue", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="black", size=3) + theme_minimal() +theme(legend.position = "none") +
           labs(title="VMAX multiplier", subtitle=paste0("Solution VMAX multiplier = ", MCMC_out %>% arrange(-improve, cost) %>% select(VMAX_x) %>%  .$VMAX_x[1] %>% unique() %>% round(6)))
 pKM <- ggplot(MCMC_out, aes(x=iter, y=KM_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="dark green", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="black", size=3) + theme_minimal() +theme(legend.position = "none") +
           labs(title="KM multiplier", subtitle=paste0("Solution KM multiplier = ", MCMC_out %>% arrange(-improve, cost) %>% select(KM_x) %>%  .$KM_x[1] %>% unique() %>% round(6)))
 
+# Create panel plot
 ggarrange(pCOST, pVMAX, pKM, ncol = 1)
 
 
