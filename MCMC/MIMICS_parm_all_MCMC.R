@@ -166,7 +166,7 @@ for(i in 1:MIM_runs) {
     
     # Set walk rate
     # Use constant, or slowly expand distributions over many iterations without improvement
-    walk_rt = 1 + iters_wo_improve/100 # using iters_wo_improve increases proposal range if no improvement is found  
+    walk_rt = 1.1 + iters_wo_improve/100 # using iters_wo_improve increases proposal range if no improvement is found  
     
     # Set max walk rate to keep from exploding proposal distributions
     if(walk_rt > 100){
@@ -234,8 +234,10 @@ options(scipen=10000)
 # Create plots for panel plot
 pCOST <- ggplot(MCMC_out, aes(x=iter, y=cost)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="dark red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="dark red", size=3) + theme_minimal() +theme(legend.position = "none") +
           labs(title="TARGET: Total respired CO2 equal to 10% of total C", subtitle=paste0("Final diff from target = ", round(min(MCMC_out$cost), 5)))
+          
 pVMAX <- ggplot(MCMC_out, aes(x=iter, y=VMAX_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="dark blue", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="black", size=3) + theme_minimal() +theme(legend.position = "none") +
           labs(title="VMAX multiplier", subtitle=paste0("Solution VMAX multiplier = ", MCMC_out %>% arrange(-improve, cost) %>% select(VMAX_x) %>%  .$VMAX_x[1] %>% unique() %>% round(6)))
+
 pKM <- ggplot(MCMC_out, aes(x=iter, y=KM_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="dark green", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="black", size=3) + theme_minimal() +theme(legend.position = "none") +
           labs(title="KM multiplier", subtitle=paste0("Solution KM multiplier = ", MCMC_out %>% arrange(-improve, cost) %>% select(KM_x) %>%  .$KM_x[1] %>% unique() %>% round(6)))
 
