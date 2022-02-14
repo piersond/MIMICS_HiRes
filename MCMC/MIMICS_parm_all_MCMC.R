@@ -162,6 +162,12 @@ for(i in 1:MIM_runs) {
     #######################################################################
     # Set walk rate
     walk_rt = 1.05 + (iters_wo_improve/100) 
+    
+    # Set max walk rate
+    if(walk_rt > 3){
+      walk_rt <- 3
+    }
+    
     # Set the parameter range min to the current value divided by
     # this number, and the max to the current value multiplied
     # by this number
