@@ -3,13 +3,19 @@
 # FYI: Packages are loaded in MIMICS_base_ftn.R
 
 # For local run
-#setwd("C:/github/MIMICS_HiRes")
+setwd("C:/github/MIMICS_HiRes")
 
 ########################################
 # Load forcing data
 ########################################
-data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
-
+#data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
+ex_data <- data.frame(SITE = 'HARV',
+                       ANPP = 744,
+                       MAT = 25,
+                       CLAY = 15, 
+                       LIG = 21,
+                       N = 1.02, 
+                       CN = 49.01960784)
 
 ########################################
 # Load MIMICS data and ftns from Brute Forcing script
@@ -22,31 +28,27 @@ source("MIMICS_ftns/MIMICS_repeat_base.R")
 ## Values are multipliers of default parameters in MIMICS sandbox
 ########################################
 
-p_rng <- data.frame(Parameter = c("Vslope", "Vint", "Kslope", "Kint", "Tau", "CUE", "desorb", "fPHYS"),
-                    P_min = c(0.5, 0.5, 0.5, 0.5, 0.1, 0.5, 0.005, 0.1),
-                    P_max = c(4, 4, 4, 4, 2, 2, 0.4, 2))
+p_rng <- data.frame(Parameter = c("Vslope", "Vint", "Kslope", "Kint", "Tau", "CUE", "desorb", "fPHYS", "VMAX", "KM"),
+                    P_min = c(0.5, 0.5, 0.5, 0.5, 0.1, 0.5, 0.005, 0.1, 0.1, 0.1),
+                    P_max = c(4, 4, 4, 4, 2, 2, 0.4, 2, 10, 10))
 
 ########################################
 # Create dataframe to store MCMC steps
 ########################################
 MCMC_out <- data.frame(i=0,
-                     iter=1,
+                     iter=0,
                      Vslope_x=1,
                      Vint_x=1,
                      Kslope_x=1,
                      Kint_x=1,
                      Tau_x=1,
                      CUE_x=1,
-                     desorb_x=0.17,
-                     fPHYS_x=0.22,
-                     slope=0,
-                     r2=0,
-                     RMSE=3.5,
-                     MICpropSOC=0,
-                     LITpropSOC=0,
-                     MIM_CO_Avg=0,
-                     SOMpTOvAvg=0,
-                     improve=1)
+                     desorb_x=1,
+                     fPHYS_x=1,
+                     VMAX_x=1,
+                     KM_x=1,
+                     CO2_frac_tot = 0, 
+                     improve=0)
 
 ########################################
 # ### Allow multi-core use (not sure this is helpful for a loop)
@@ -72,45 +74,52 @@ curr_p <- data.frame(Vslope_x = 1,
                      Kint_x = 1,
                      Tau_x = 1,
                      CUE_x = 1,
-                     desorb_x = 0.17,
-                     fPHYS_x = 0.22,
+                     desorb_x = 1,
+                     fPHYS_x = 1,
+                     VMAX_x=1,
+                     KM_x=1,
                      run_num=NA)
 
 # Set initial cost value (RMSE value to improve from)
-curr_cost <- 3.5 #RMSE value to improve upon
+curr_cost <- 0.5 #RMSE value to improve upon
 
 #Set trackers
 iters_wo_improve = 0
 
 #Set number of iterations (3 trials are nested within each run)
-MIM_runs <- 5000
+MIM_runs <- 10
 
 # Send progress statement to console
 print(paste0("Running ", as.character(MIM_runs), " MCMC iterations"))
 
-###DEBUG
 
 #Run MCMC loop
 for(i in 1:MIM_runs) {
+  
+  #DEBUG
+  #i <- 1
   
   print(paste0("Running proposal set #", as.character(i)))
   
   #Set new parameter value
   test_p <- curr_p
   
-  #Get random parameters to test, in groups
-  test_p[1,1] <- runif(1, p_rng[1,2], p_rng[1,3]) #Vslope
-  test_p[1,2] <- runif(1, p_rng[2,2], p_rng[2,3]) #Vint
-  test_p[1,3] <- runif(1, p_rng[3,2], p_rng[3,3]) #Kslope
-  test_p[1,4] <- runif(1, p_rng[4,2], p_rng[4,3]) #Kint
-  test_p[1,5] <- runif(1, p_rng[5,2], p_rng[5,3]) #Tau
-  test_p[1,6] <- runif(1, p_rng[6,2], p_rng[6,3]) #CUE 
-  test_p[1,7] <- runif(1, p_rng[7,2], p_rng[7,3]) #desorb
-  test_p[1,8] <- runif(1, p_rng[8,2], p_rng[8,3]) #fPHYS
   
+  
+  #Get random parameters to test, in groups
+  test_p[1,1] <- 1 #runif(1, p_rng[1,2], p_rng[1,3]) #Vslope
+  test_p[1,2] <- 1 #runif(1, p_rng[2,2], p_rng[2,3]) #Vint
+  test_p[1,3] <- 1 #runif(1, p_rng[3,2], p_rng[3,3]) #Kslope
+  test_p[1,4] <- 1 #runif(1, p_rng[4,2], p_rng[4,3]) #Kint
+  test_p[1,5] <- 1 #runif(1, p_rng[5,2], p_rng[5,3]) #Tau
+  test_p[1,6] <- 1 #runif(1, p_rng[6,2], p_rng[6,3]) #CUE 
+  test_p[1,7] <- 1 #runif(1, p_rng[7,2], p_rng[7,3]) #desorb
+  test_p[1,8] <- 1 #runif(1, p_rng[8,2], p_rng[8,3]) #fPHYS
+  test_p[1,9] <- runif(1, p_rng[9,2], p_rng[9,3]) #VMAX
+  test_p[1,10] <- runif(1, p_rng[10,2], p_rng[10,3]) #KM
   
   #Run MIMICS ftn with test parameters
-  MIMout <- MIMrepeat(forcing_df = data, rparams = test_p)
+  MIMout <- MIMrepeat(forcing_df = ex_data, rparams = test_p)
   
   #log parameter updates in dataframe
   iter_out <- data.frame(i=i,
@@ -123,41 +132,34 @@ for(i in 1:MIM_runs) {
                          CUE_x=test_p[6],
                          desorb_x=test_p[7],
                          fPHYS_x=test_p[8],
-                         slope=MIMout$slope,
-                         r2=MIMout$r2,
-                         RMSE=MIMout$RMSE,
-                         MICpropSOC=MIMout$MICpropSOC,
-                         LITpropSOC=MIMout$LITpropSOC,
-                         MIM_CO_Avg=MIMout$MIM_CO_mn,
-                         SOMpTOvAvg=MIMout$SOMpTO,
+                         VMAX_x=test_p[9],
+                         KM_x=test_p[10],
+                         
+                         #Cost ftn pieces
+                         CO2_frac_tot = round(rowSums(MIMout[,10:11])[nrow(MIMout)]/rowSums(MIMout[,3:11])[nrow(MIMout)], 4),
+
                          improve=0)
   
   #Make decision based on cost outcome
-  if(MIMout$RMSE < curr_cost &&
-     MIMout$MICpropSOC > 0.01 &&
-     MIMout$MICpropSOC < 0.08 &&
-     MIMout$LITpropSOC > 0.05 &&
-     MIMout$LITpropSOC < 0.50 &&
-     MIMout$MIM_CO_mn > 0.01 &&
-     MIMout$MIM_CO_mn < 100 &&
-     MIMout$SOMpTO > 50 &&
-     MIMout$SOMpTO < 1000) 
-  {
+  CO2_tot_target <- 0.1 # <-- get this from site data spreadsheet later
+  cost <- abs(iter_out$CO2_frac_tot - CO2_tot_target)
+  if(!is.nan(iter_out$CO2_frac_tot) & cost < curr_cost) {
     
     #Update targets
     curr_p <- test_p
-    curr_cost <- MIMout$RMSE
+    curr_cost <- cost
     iter_out$improve <- 1
     iters_wo_improve <- 0
     
     # Print to console
-    print(paste0("IMPROVED RMSE TO ", round(MIMout$RMSE,2)))
+    print(paste0("MINIMIZED COST TO ", curr_cost))
     
     ## Walk proposal distributions 
     # ONLY USEFUL IF COMPUTATIONAL POWER IS LIMITED, comment out if not
     #######################################################################
     # Set walk rate
-    walk_rt = 2 # Set the parameter range min to the current value dived by
+    walk_rt = 0.001 * (iters_wo_improve/10) 
+    # Set the parameter range min to the current value divided by
     # this number, and the max to the current value multiplied
     # by this number
     
@@ -186,6 +188,8 @@ for(i in 1:MIM_runs) {
     
     p_rng[8,2] <- iter_out$fPHYS_x / walk_rt # fPHYS min
     p_rng[8,3] <- iter_out$fPHYS_x +(iter_out$fPHYS_x-(iter_out$fPHYS_x/walk_rt)) # fPHYS max
+    
+    
     
   } else {
     #update tracker for number of iterations without improvement
@@ -238,5 +242,5 @@ nbrOfWorkers()
 #######################
 # Export MCMC run data
 #######################
-write.csv(MCMC_out, paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs), ".csv"))
+#write.csv(MCMC_out, paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs), ".csv"))
 

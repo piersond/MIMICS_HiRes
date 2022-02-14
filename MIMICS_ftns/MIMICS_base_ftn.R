@@ -1,6 +1,6 @@
 ## Set working drive
 #setwd("C:/github/MIMICS_HiRes")
-setwd("C:/github/MIMICS_HiRes/MIMICS_ftns")
+setwd("C:/github/MIMICS_HiRes")
 
 #Libraries
 library(rootSolve)
@@ -9,61 +9,64 @@ library(ggplot2)
 library(ggpubr)
 library(tidyverse)
 library(Metrics) 
-#library(parallel)
-#library(furrr)
-#library(purrr)
+library(parallel)
+library(furrr)
+library(purrr)
 #library(grid)
 #library(gridExtra)
 
 #bring in RXEQ function
-source("RXEQ_ftn.R")
+source("MIMICS_ftns/RXEQ_ftn.R")
 
 ########################################
 # Set MIMICS default parameters
 ########################################
-# Vslope  <- rep(0.063, 6)
-# Vint    <- rep(5.47, 6)
-# aV      <- rep(0.000000075, 6)  
-# Kslope  <- rep(0.02, 6)
-# Kint    <- rep(3.19, 6)
-# aK      <- rep(0.15625, 6)
-# vMOD    <- c(2, 0.4, 2, 0.6, 0.6, 0.4)
-# kMOD    <- c(8, 2, 4, 2, 4, 6)
-# KO      <- c(6, 6)
-# CUE     <- c(0.5, 0.25, 0.7, 0.35)
-# tau_r   <- c(0.00052, 0.3)
-# tau_K   <- c(0.00024, 0.1)
-# Tau_MOD <- c(100, 0.6, 1.3, 3.5)
-# Tau_MULT <- 1
-# fPHYS_r <- c(0, 0)
-# fPHYS_K <- c(0, 0)
-# fCHEM_r <- c(0.1, -3, 1)
-# fCHEM_K <- c(0.3, -3, 1)
-# fSOM_p  <- c(0.000015, -1.5)
-# PHYS_scalar <- c(2, -2, NA, NA, NA, NA)
-# FI      <- c(0.05, 0.05)
-# fmet_p <- c(1, 0.85, 0.013)
-# depth <- 5 ###
-# h2y        <- 24*365
-# MICROtoECO <- depth * 1e4 * 1e-3  # mgC/cm3 to g/m2
-# 
-# #Set default multipliers
-# Tau_MULT = 1
-# desorb_MULT = 1
-# fPHYS_MULT = 1
+Vslope  <- rep(0.063, 6)
+Vint    <- rep(5.47, 6)
+aV      <- rep(0.000000075, 6)
+Kslope  <- rep(0.02, 6)
+Kint    <- rep(3.19, 6)
+aK      <- rep(0.15625, 6)
+vMOD    <- c(2, 0.4, 2, 0.6, 0.6, 0.4)
+kMOD    <- c(8, 2, 4, 2, 4, 6)
+KO      <- c(6, 6)
+CUE     <- c(0.5, 0.25, 0.7, 0.35)
+tau_r   <- c(0.00052, 0.3)
+tau_K   <- c(0.00024, 0.1)
+Tau_MOD <- c(100, 0.6, 1.3, 3.5)
+Tau_MULT <- 1
+fPHYS_r <- c(0, 0)
+fPHYS_K <- c(0, 0)
+fCHEM_r <- c(0.1, -3, 1)
+fCHEM_K <- c(0.3, -3, 1)
+fSOM_p  <- c(0.000015, -1.5)
+PHYS_scalar <- c(2, -2, NA, NA, NA, NA)
+FI      <- c(0.05, 0.05)
+fmet_p <- c(1, 0.85, 0.013)
+depth <- 5 ###
+h2y        <- 24*365
+MICROtoECO <- depth * 1e4 * 1e-3  # mgC/cm3 to g/m2
 
+#Set default multipliers
+Tau_MULT = 1
+desorb_MULT = 1
+fPHYS_MULT = 1
+VMAX_MULT = 1
+KM_MULT = 1
 
 ########################################
 # Apply parameter multipliers
 ########################################
-# Vslope = Vslope * 1.693578
-# Vint = Vint * 0.633318
-# Kslope = Kslope * 1.782366
-# Kint = Kint * 0.3609913
+Vslope = Vslope * 2.632015
+Vint = Vint * 0.7244883
+Kslope = Kslope * 1.567581
+Kint = Kint * 1.4903838
 # CUE = CUE * 1
 # Tau_MULT = 1
 # desorb_MULT = 2.3635554
 # fPHYS_MULT = 2.0716163
+#VMAX_MULT = 1
+#KM_MULT = 1
 
 ###########################################
 # MIMICS single point function
@@ -136,6 +139,10 @@ MIMICS1 <- function(df){
   
   VMAX     <- Vmax * v_MOD 
   KM       <- Km / k_MOD
+  
+  #MC scalars on VMAX and Km
+  VMAX <- VMAX * VMAX_MULT
+  KM <- KM * KM_MULT
   
   LITmin  <- rep(NA, dim=4)
   MICtrn  <- rep(NA, dim=6)
@@ -261,7 +268,7 @@ MIMICS1 <- function(df){
 # Plots
 ###########
 
-# # Litter mass
+# Litter mass
 # plot_LIT <- ggplot(MIMout, aes(y=LITs, x=DAY, color="Structural")) + geom_line(size=1) +
 #   geom_line(aes(y=LITm, x=DAY, color="Metabolic"), size=1) +
 #   theme_bw() +
@@ -278,10 +285,10 @@ MIMICS1 <- function(df){
 #   ylab("Microbial and soil C") +
 #   xlab("Incubation Time (days)") +
 #   labs(color = "C Pool") +
-#   ylim(0, 2.4)
+#   ylim(0, 3)
 # 
 # # CO2 fraction
-# plot_CO2 <- ggplot(MIMout, aes(y=rowSums(MIMout[,10:11])/rowSums(MIMout[,3:11]), 
+# plot_CO2 <- ggplot(MIMout, aes(y=rowSums(MIMout[,10:11])/rowSums(MIMout[,3:11]),
 #                    x=DAY, color="CO2-C")) + geom_line(size=1) +
 #   theme_bw() +
 #   ylab("CO2 (fraction of initial") +
