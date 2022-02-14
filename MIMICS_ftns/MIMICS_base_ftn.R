@@ -7,8 +7,8 @@ library(rootSolve)
 #library(boot)
 library(ggplot2)
 library(ggpubr)
-#library(tidyverse)
-#library(Metrics) 
+library(tidyverse)
+library(Metrics) 
 #library(parallel)
 #library(furrr)
 #library(purrr)
@@ -21,36 +21,36 @@ source("RXEQ_ftn.R")
 ########################################
 # Set MIMICS default parameters
 ########################################
-Vslope  <- rep(0.063, 6)
-Vint    <- rep(5.47, 6)
-aV      <- rep(0.000000075, 6)  
-Kslope  <- rep(0.02, 6)
-Kint    <- rep(3.19, 6)
-aK      <- rep(0.15625, 6)
-vMOD    <- c(2, 0.4, 2, 0.6, 0.6, 0.4)
-kMOD    <- c(8, 2, 4, 2, 4, 6)
-KO      <- c(6, 6)
-CUE     <- c(0.5, 0.25, 0.7, 0.35)
-tau_r   <- c(0.00052, 0.3)
-tau_K   <- c(0.00024, 0.1)
-Tau_MOD <- c(100, 0.6, 1.3, 3.5)
-Tau_MULT <- 1
-fPHYS_r <- c(0, 0)
-fPHYS_K <- c(0, 0)
-fCHEM_r <- c(0.1, -3, 1)
-fCHEM_K <- c(0.3, -3, 1)
-fSOM_p  <- c(0.000015, -1.5)
-PHYS_scalar <- c(2, -2, NA, NA, NA, NA)
-FI      <- c(0.05, 0.05)
-fmet_p <- c(1, 0.85, 0.013)
-depth <- 5 ###
-h2y        <- 24*365
-MICROtoECO <- depth * 1e4 * 1e-3  # mgC/cm3 to g/m2
-
-#Set default multipliers
-Tau_MULT = 1
-desorb_MULT = 1
-fPHYS_MULT = 1
+# Vslope  <- rep(0.063, 6)
+# Vint    <- rep(5.47, 6)
+# aV      <- rep(0.000000075, 6)  
+# Kslope  <- rep(0.02, 6)
+# Kint    <- rep(3.19, 6)
+# aK      <- rep(0.15625, 6)
+# vMOD    <- c(2, 0.4, 2, 0.6, 0.6, 0.4)
+# kMOD    <- c(8, 2, 4, 2, 4, 6)
+# KO      <- c(6, 6)
+# CUE     <- c(0.5, 0.25, 0.7, 0.35)
+# tau_r   <- c(0.00052, 0.3)
+# tau_K   <- c(0.00024, 0.1)
+# Tau_MOD <- c(100, 0.6, 1.3, 3.5)
+# Tau_MULT <- 1
+# fPHYS_r <- c(0, 0)
+# fPHYS_K <- c(0, 0)
+# fCHEM_r <- c(0.1, -3, 1)
+# fCHEM_K <- c(0.3, -3, 1)
+# fSOM_p  <- c(0.000015, -1.5)
+# PHYS_scalar <- c(2, -2, NA, NA, NA, NA)
+# FI      <- c(0.05, 0.05)
+# fmet_p <- c(1, 0.85, 0.013)
+# depth <- 5 ###
+# h2y        <- 24*365
+# MICROtoECO <- depth * 1e4 * 1e-3  # mgC/cm3 to g/m2
+# 
+# #Set default multipliers
+# Tau_MULT = 1
+# desorb_MULT = 1
+# fPHYS_MULT = 1
 
 
 ########################################
@@ -237,15 +237,15 @@ MIMICS1 <- function(df){
 # ##############################################
 # #single point run
 # ##############################################
-df <- data.frame(SITE = 'HARV',
-                   ANPP = 744,
-                   MAT = 25,#7.1,
-                   CLAY = 15,
-                   LIG = 21,
-                   N = 1.02,
-                   CN = 49.01960784)
-
-MIMout <- MIMICS1(df[1,])
+# df <- data.frame(SITE = 'HARV',
+#                    ANPP = 744,
+#                    MAT = 25,#7.1,
+#                    CLAY = 15,
+#                    LIG = 21,
+#                    N = 1.02,
+#                    CN = 49.01960784)
+# 
+# MIMout <- MIMICS1(df[1,])
 
 
 # ##############################################
@@ -261,36 +261,36 @@ MIMout <- MIMICS1(df[1,])
 # Plots
 ###########
 
-# Litter mass
-plot_LIT <- ggplot(MIMout, aes(y=LITs, x=DAY, color="Structural")) + geom_line(size=1) +
-  geom_line(aes(y=LITm, x=DAY, color="Metabolic"), size=1) +
-  theme_bw() +
-  ylab("Litter mass remaining (%)") +
-  xlab("Incubation Time (days)") +
-  labs(color = "Litter Pool")
-
-# SOM & MIC pools
-plot_SOM_MIC <- ggplot(MIMout, aes(SOMc, x=DAY, color="SOMc")) + geom_line(size=1) +
-  geom_line(aes(y=SOMa, x=DAY, color="SOMa"), size=1) +
-  geom_line(aes(y=MICr, x=DAY, color="MIC-r"), size=1) +
-  geom_line(aes(y=MICK, x=DAY, color="MIC-K"), size=1) +
-  theme_bw() +
-  ylab("Microbial and soil C") +
-  xlab("Incubation Time (days)") +
-  labs(color = "C Pool") +
-  ylim(0, 2.4)
-
-# CO2 fraction
-plot_CO2 <- ggplot(MIMout, aes(y=rowSums(MIMout[,10:11])/rowSums(MIMout[,3:11]), 
-                   x=DAY, color="CO2-C")) + geom_line(size=1) +
-  theme_bw() +
-  ylab("CO2 (fraction of initial") +
-  xlab("Incubation Time (days)") +
-  labs(color = "C Pool")
-
-
-# Build a panel plot
-ggarrange(plot_LIT, plot_SOM_MIC, plot_CO2,
-          nrow=3,
-          ncol=1)
+# # Litter mass
+# plot_LIT <- ggplot(MIMout, aes(y=LITs, x=DAY, color="Structural")) + geom_line(size=1) +
+#   geom_line(aes(y=LITm, x=DAY, color="Metabolic"), size=1) +
+#   theme_bw() +
+#   ylab("Litter mass remaining (%)") +
+#   xlab("Incubation Time (days)") +
+#   labs(color = "Litter Pool")
+# 
+# # SOM & MIC pools
+# plot_SOM_MIC <- ggplot(MIMout, aes(SOMc, x=DAY, color="SOMc")) + geom_line(size=1) +
+#   geom_line(aes(y=SOMa, x=DAY, color="SOMa"), size=1) +
+#   geom_line(aes(y=MICr, x=DAY, color="MIC-r"), size=1) +
+#   geom_line(aes(y=MICK, x=DAY, color="MIC-K"), size=1) +
+#   theme_bw() +
+#   ylab("Microbial and soil C") +
+#   xlab("Incubation Time (days)") +
+#   labs(color = "C Pool") +
+#   ylim(0, 2.4)
+# 
+# # CO2 fraction
+# plot_CO2 <- ggplot(MIMout, aes(y=rowSums(MIMout[,10:11])/rowSums(MIMout[,3:11]), 
+#                    x=DAY, color="CO2-C")) + geom_line(size=1) +
+#   theme_bw() +
+#   ylab("CO2 (fraction of initial") +
+#   xlab("Incubation Time (days)") +
+#   labs(color = "C Pool")
+# 
+# 
+# # Build a panel plot
+# ggarrange(plot_LIT, plot_SOM_MIC, plot_CO2,
+#           nrow=3,
+#           ncol=1)
 
