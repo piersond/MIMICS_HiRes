@@ -109,6 +109,7 @@ for(i in 1:MIM_runs) {
   CO2_tot_target <- 0.1 # <-- Get this from site data spreadsheet later
   
   #Get random parameters to test, in groups
+  #Currently using uniform distributions... need to experiment with other distributions
   test_p[1,1] <- 1 #runif(1, p_rng[1,2], p_rng[1,3]) #Vslope
   test_p[1,2] <- 1 #runif(1, p_rng[2,2], p_rng[2,3]) #Vint
   test_p[1,3] <- 1 #runif(1, p_rng[3,2], p_rng[3,3]) #Kslope
@@ -166,7 +167,7 @@ for(i in 1:MIM_runs) {
     
     # Set walk rate
     # Use constant, or slowly expand distributions over many iterations without improvement
-    walk_rt = 1.1 + iters_wo_improve/100 # using iters_wo_improve increases proposal range if no improvement is found  
+    walk_rt = 1.05 + iters_wo_improve/400 # using iters_wo_improve increases proposal range if no improvement is found  
     
     # Set max walk rate to keep from exploding proposal distributions
     if(walk_rt > 100){
