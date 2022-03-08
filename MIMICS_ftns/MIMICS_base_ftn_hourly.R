@@ -307,7 +307,7 @@ data <- data.frame(Site = "Site1",
                    CLAY = 20,
                    lig_N = 11)
 
-MIMout <- MIMICS_hr(data[1,], 50000)
+MIMout <- MIMICS_hr(data[1,], 100000)
 
 ##############################################
 # Full forcing dataset run

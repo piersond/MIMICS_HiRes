@@ -70,7 +70,7 @@ fSOM_p  <- c(0.000015, -1.5)
 PHYS_scalar <- c(2, -2, NA, NA, NA, NA)
 FI      <- c(0.05, 0.05)
 fmet_p <- c(1, 0.85, 0.013)
-depth <- 30 ###
+depth <- 5 ###
 h2y        <- 24*365
 MICROtoECO <- depth * 1e4 * 1e-3  # mgC/cm3 to g/m2
 
@@ -83,19 +83,21 @@ fPHYS_MULT = 1
 ########################################
 # Apply parameter multipliers
 ########################################
-# Vslope = Vslope * 3.85
-# Vint = Vint * 1.16
-# Kslope = Kslope * 0.84
-# Kint = Kint * 1.55
-# CUE = CUE * 0.54
-# Tau_MULT = 0.46
-# desorb_MULT = 0.08
-# fPHYS_MULT = 0.34
+Vslope = Vslope * 3.85
+Vint = Vint * 1.16
+Kslope = Kslope * 0.84
+Kint = Kint * 1.55
+CUE = CUE * 0.54
+Tau_MULT = 0.46
+desorb_MULT = 0.08
+fPHYS_MULT = 0.34
 
 ###########################################
 # MIMICS single point function
 ###########################################
 MIMICS1 <- function(df){
+  
+  #df <- data[1,]
   
   ### Setup a var to collect run notes
   note <- ""
@@ -125,7 +127,7 @@ MIMICS1 <- function(df){
   
   ## Modify as necessary to approximate ANPP
   # e.g. ANPP ~ GPP from MSAVI +400, then divided by 2 
-  ANPP <-  (ANPP+400)/2
+  ANPP <-  ANPP/2
   
   #prevent negative ANPP
   if(ANPP < 1){
@@ -240,8 +242,9 @@ MIMICS1 <- function(df){
   MIMSOC    <- sum(test[[1]])  * depth *1e4 / 1e6   
   
   table <- as.numeric(test[[1]])
+  co2_out <- as.numeric(test[[2]])
   
-  MIMout <- data.frame(Site = df$Site,
+  MIMout <- data.frame(Site = df$SITE,
                        fCLAY = fCLAY,
                        TSOI = TSOI,
                        ANPP = ANPP,
@@ -260,7 +263,9 @@ MIMICS1 <- function(df){
                        SOMp = table[5] * depth *1e4 / 1e6,
                        SOMc = table[6] * depth *1e4 / 1e6,
                        SOMa = table[7] * depth *1e4 / 1e6,
-                       JITn = test[[2]],
+                       CO2 = co2_out[1] + co2_out[2],
+                       CO2r = co2_out[1],
+                       CO2K = co2_out[2],
                        DEBUG = note
   )
   #Reset global parameters from last run
@@ -292,7 +297,7 @@ MIMICS1 <- function(df){
 # #single point run
 # ##############################################
 # data <- data.frame(Site = 1,
-#                    pGPP = 1.39,
+#                    pGPP = 1. 39,
 #                    TSOI = 10.6,
 #                    CLAY = 20,
 #                    lig_N = 11)
@@ -303,12 +308,9 @@ MIMICS1 <- function(df){
 ##############################################
 # Full forcing dataset run
 ##############################################
-data <- read.csv("RCrk_Modelling_Data/Hasini_MIMICS_tbl_default_030122.csv", as.is=T, skip=1) %>% 
-  select(SITE, SOC, Clay, dGEP, MAST, LigN)
+data <- read.csv("RCrk_Modelling_Data/Hasini_MIMICS_tbl_CO2.csv", as.is=T) 
 
-colnames(data) <- c("Site", "SOC", "CLAY", "pGPP", "TSOI", "lig_N")
-
-data$pGPP <- data$pGPP - 400 
+colnames(data) <- c("SITE", "SOC", "TSOI", "MAP", "CLAY", "pGPP", "lig_N", "CO2_rFLATS")
 
 MIMout_single <- MIMICS1(data[1,])
 
@@ -334,17 +336,77 @@ lb2 <- paste("R^2 == ", r_val)
 
 rmse <- round(rmse(MIMrun$SOC, MIMrun$MIMSOC),2)
 
-defparms <- ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=ANPP)) +
+ggplot(plot_data, aes(x=MIMSOC, y=SOC, color=ANPP)) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed")+
   geom_point(size=4, alpha=0.8) +
-  geom_text(aes(label=paste0(Site)),hjust=-0.2, vjust=0.2) +
+  geom_text(aes(label=paste0(SITE)),hjust=-0.2, vjust=0.2) +
   annotate("text", label = lb2, x = 2, y = 8.5, size = 6, colour = "black", parse=T) +
   annotate("text", label = paste0("RMSE = ", rmse), x = 2, y = 7.4, size = 6, colour = "black") +
   ylim(0,10) + xlim(0,10)
 
-library(ggpubr)
+###
 
-ggarrange(defparms,
-          rcparms,
+plot_data$rel_flats_CO2 <- c(plot_data$CO2[1]/plot_data$CO2[1],
+                       plot_data$CO2[2]/plot_data$CO2[1],
+                       plot_data$CO2[3]/plot_data$CO2[1],
+                       plot_data$CO2[4]/plot_data$CO2[1])
+
+plot_data$SITE <- factor(plot_data$SITE, levels=c("Flats", "Nancy Gulch", "Lower Sheep", "Reynolds Mountain East"))
+ggplot(plot_data, aes(y=rel_flats_CO2, x=SITE)) + geom_histogram(stat='identity')
+
+
+###
+defparms_CO2 <- ggplot(plot_data_def, aes(x=SITE, y=CO2r*1000, color="MICr")) + geom_point(size=3) +
+  geom_point(aes(x=SITE, y=CO2K*1000, color="MICK"), size=3) +
+  geom_point(aes(x=SITE, y=(CO2K+CO2r)*1000, color="Total"), size=3) +
+  ylim(0, 1) +
+  ylab("MIMICS Steady State\nCO2-C * 1000") +
+  guides(color="none") +#labs(color = "Source") +
+  ggtitle("Defualt parameters") +
+  theme_bw()
+
+defparms_SOC <- ggplot(plot_data_def, aes(x=SITE, y=MIMSOC, color="MIMSOC")) + geom_point(size=3) +
+  geom_point(aes(x=SITE, y=MIMLIT, color="MIMLIT"), size=3) +
+  geom_point(aes(x=SITE, y=MIMMIC, color="MIMMIC"), size=3) +
+  geom_point(aes(x=SITE, y=SOMp, color="SOMp"), size=3) +
+  geom_point(aes(x=SITE, y=SOMc, color="SOMc"), size=3) +
+  geom_point(aes(x=SITE, y=SOMa, color="SOMa"), size=3) +
+  ylim(0, 3.6) +
+  ylab("MIMICS Steady State\n C Pools") +
+  guides(color="none") +#labs(color = "Source") + 
+  ggtitle("Defualt parameters") +
+  theme_bw()
+
+
+rcparms_CO2 <- ggplot(plot_data_rc, aes(x=SITE, y=CO2r*1000, color="MICr")) + geom_point(size=3) +
+  geom_point(aes(x=SITE, y=CO2K*1000, color="MICK"), size=3) +
+  geom_point(aes(x=SITE, y=(CO2K+CO2r)*1000, color="Total"), size=3) +
+  ylim(0, 1) +
+  ylab("MIMICS Steady State\nCO2-C * 1000") +
+  labs(color = "Source") +
+  ggtitle("RCrk MCMC parameters") +
+  theme_bw()
+
+rcparms_SOC <- ggplot(plot_data_rc, aes(x=SITE, y=MIMSOC, color="MIMSOC")) + geom_point(size=3) +
+  geom_point(aes(x=SITE, y=MIMLIT, color="MIMLIT"), size=3) +
+  geom_point(aes(x=SITE, y=MIMMIC, color="MIMMIC"), size=3) +
+  geom_point(aes(x=SITE, y=SOMp, color="SOMp"), size=3) +
+  geom_point(aes(x=SITE, y=SOMc, color="SOMc"), size=3) +
+  geom_point(aes(x=SITE, y=SOMa, color="SOMa"), size=3) +
+  ylim(0, 3.6) +
+  ylab("MIMICS Steady State\n C Pools") +
+  labs(color = "Source") +
+  ggtitle("RCrk MCMC parameters") +
+  theme_bw()
+
+
+
+library(ggpubr)
+ggarrange(defparms_CO2,
+          rcparms_CO2,
+          defparms_SOC,
+          rcparms_SOC,
           ncol=2,
-          nrow=1)
+          nrow=2,
+          widths = c(0.8, 1),
+          common.legend = F)

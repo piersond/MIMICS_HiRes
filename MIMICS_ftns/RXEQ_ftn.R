@@ -44,7 +44,8 @@ RXEQ <- function(t, y, pars) {
     
     dSOM_3 = MICtrn[3] + MICtrn[6] + DEsorb + OXIDAT - SOMmin[1] - SOMmin[2]
     
-    list(c(dLIT_1, dLIT_2, dMIC_1, dMIC_2, dSOM_1, dSOM_2, dSOM_3,CO2_1,CO2_2))
+    list(c(dLIT_1, dLIT_2, dMIC_1, dMIC_2, dSOM_1, dSOM_2, dSOM_3),
+        c(CO2r=CO2_1, CO2K=CO2_2))
   })
 }
 
