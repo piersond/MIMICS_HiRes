@@ -35,14 +35,16 @@ RXEQ <- function(t, y, pars) {
     
     dMIC_1 = CUE[1]*(LITmin[1]+ SOMmin[1]) + CUE[2]*(LITmin[2]) - (MICtrn[[1]] + MICtrn[[2]] + MICtrn[[3]])#sum(MICtrn[1:3])
     dSOM_1 = I[1]*FI[1] + MICtrn[1] + MICtrn[4]- DEsorb 
+    CO2_1  = (1-CUE[1])*(LITmin[1]+ SOMmin[1]) + (1-CUE[2])*(LITmin[2])
     
     dLIT_2 = I[2] * (1-FI[2]) - LITmin[2] - LITmin[4]
     dMIC_2 = CUE[3]*(LITmin[3]+ SOMmin[2]) + CUE[4]*(LITmin[4]) - (MICtrn[[4]] + MICtrn[[5]] + MICtrn[[6]])#sum(MICtrn[4:6])
     dSOM_2 = I[2]*FI[2] + MICtrn[2] + MICtrn[5] - OXIDAT
+    CO2_2  = (1-CUE[3])*(LITmin[3]+ SOMmin[2]) + (1-CUE[4])*(LITmin[4])
     
     dSOM_3 = MICtrn[3] + MICtrn[6] + DEsorb + OXIDAT - SOMmin[1] - SOMmin[2]
     
-    list(c(dLIT_1, dLIT_2, dMIC_1, dMIC_2, dSOM_1, dSOM_2, dSOM_3))
+    list(c(dLIT_1, dLIT_2, dMIC_1, dMIC_2, dSOM_1, dSOM_2, dSOM_3,CO2_1,CO2_2))
   })
 }
 
