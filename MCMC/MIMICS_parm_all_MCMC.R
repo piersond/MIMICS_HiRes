@@ -48,7 +48,10 @@ MCMC_out <- data.frame(i=0,
                      VMAX_x=1,
                      KM_x=1,
                      CO2_frac_tot = 0, 
-                     cost = 0.5,
+                     CO2_half_tot = 0,
+                     cost1 = 0.5,
+                     cost2 = 0.5,
+                     cost = 1,
                      improve=0)
 
 ########################################
@@ -88,7 +91,7 @@ curr_cost <- 0.5 #RMSE value to improve upon
 iters_wo_improve = 1
 
 #Set number of iterations (3 trials are nested within each run)
-MIM_runs <- 1000
+MIM_runs <- 100
 
 # Send progress statement to console
 print(paste0("Running ", as.character(MIM_runs), " MCMC iterations"))
@@ -96,9 +99,6 @@ print(paste0("Running ", as.character(MIM_runs), " MCMC iterations"))
 
 #Run MCMC loop
 for(i in 1:MIM_runs) {
-  
-  #DEBUG
-  #i <- 1
   
   print(paste0("Running proposal set #", as.character(i)))
   
@@ -140,13 +140,22 @@ for(i in 1:MIM_runs) {
                          
                          #Cost ftn pieces
                          CO2_frac_tot = round(rowSums(MIMout[,10:11])[nrow(MIMout)]/rowSums(MIMout[,3:11])[nrow(MIMout)], 4),
-                         cost = abs(round(rowSums(MIMout[,10:11])[nrow(MIMout)]/rowSums(MIMout[,3:11])[nrow(MIMout)], 4) - CO2_tot_target), 
+                         CO2_half_tot = round(rowSums(MIMout[,10:11])[nrow(MIMout)/2]/rowSums(MIMout[,3:11])[nrow(MIMout)/2], 4),
+                         
+                         cost1 = abs(round(rowSums(MIMout[,10:11])[nrow(MIMout)]/rowSums(MIMout[,3:11])[nrow(MIMout)], 4) - CO2_tot_target), 
+                         cost2 = abs(round(rowSums(MIMout[,10:11])[nrow(MIMout)/2]/rowSums(MIMout[,3:11])[nrow(MIMout)/2], 4) - CO2_tot_target/2), 
+                         cost = NA,
                          
                          improve=0)
   
   #Make decision based on cost outcome
 
-  cost <- abs(iter_out$CO2_frac_tot - CO2_tot_target)
+  cost1 <- abs(iter_out$CO2_frac_tot - CO2_tot_target)
+  cost2 <- abs(iter_out$CO2_half_tot - CO2_tot_target/2)  
+  cost <- cost1 + cost2
+  iter_out$cost <- cost
+  
+  
   if(!is.nan(iter_out$CO2_frac_tot) & cost < curr_cost) {
     
     #Update targets
@@ -167,7 +176,7 @@ for(i in 1:MIM_runs) {
     
     # Set walk rate
     # Use constant, or slowly expand distributions over many iterations without improvement
-    walk_rt = 1.05 + iters_wo_improve/400 # using iters_wo_improve increases proposal range if no improvement is found  
+    walk_rt = 1.05 + iters_wo_improve/200 # using iters_wo_improve increases proposal range if no improvement is found  
     
     # Set max walk rate to keep from exploding proposal distributions
     if(walk_rt > 100){
@@ -180,29 +189,29 @@ for(i in 1:MIM_runs) {
     
     # New proposal distributions
     ####################################
-    # p_rng[1,2] <- iter_out$Vslope_x / walk_rt # V_slope min
-    # p_rng[1,3] <- iter_out$Vslope_x +(iter_out$Vslope_x-(iter_out$Vslope_x/walk_rt)) # V_slope max
+    # p_rng[1,2] <- curr_p$Vslope_x / walk_rt # V_slope min
+    # p_rng[1,3] <- curr_p$Vslope_x +(curr_p$Vslope_x-(curr_p$Vslope_x/walk_rt)) # V_slope max
     # 
-    # p_rng[2,2] <- iter_out$Vint_x / walk_rt # V_int min
-    # p_rng[2,3] <- iter_out$Vint_x +(iter_out$Vint_x-(iter_out$Vint_x/walk_rt)) # V_int max
+    # p_rng[2,2] <- curr_p$Vint_x / walk_rt # V_int min
+    # p_rng[2,3] <- curr_p$Vint_x +(curr_p$Vint_x-(curr_p$Vint_x/walk_rt)) # V_int max
     # 
-    # p_rng[3,2] <- iter_out$Kslope_x / walk_rt # K_slope min
-    # p_rng[3,3] <- iter_out$Kslope_x +(iter_out$Kslope_x-(iter_out$Kslope_x/walk_rt)) # K_slope max
+    # p_rng[3,2] <- curr_p$Kslope_x / walk_rt # K_slope min
+    # p_rng[3,3] <- curr_p$Kslope_x +(curr_p$Kslope_x-(curr_p$Kslope_x/walk_rt)) # K_slope max
     # 
-    # p_rng[3,2] <- iter_out$Kint_x / walk_rt # K_int min
-    # p_rng[3,3] <- iter_out$Kint_x +(iter_out$Kint_x-(iter_out$Kint_x/walk_rt)) # K_int max
+    # p_rng[3,2] <- curr_p$Kint_x / walk_rt # K_int min
+    # p_rng[3,3] <- curr_p$Kint_x +(curr_p$Kint_x-(curr_p$Kint_x/walk_rt)) # K_int max
     # 
-    # p_rng[5,2] <- iter_out$Tau_x / walk_rt # Tau min
-    # p_rng[5,3] <- iter_out$Tau_x +(iter_out$Tau_x-(iter_out$Tau_x/walk_rt)) # Tau max
+    # p_rng[5,2] <- curr_p$Tau_x / walk_rt # Tau min
+    # p_rng[5,3] <- curr_p$Tau_x +(curr_p$Tau_x-(curr_p$Tau_x/walk_rt)) # Tau max
     # 
-    # p_rng[6,2] <- iter_out$CUE_x / walk_rt # CUE min
-    # p_rng[6,3] <- iter_out$CUE_x +(iter_out$CUE_x-(iter_out$CUE_x/walk_rt)) # CUE max
+    # p_rng[6,2] <- curr_p$CUE_x / walk_rt # CUE min
+    # p_rng[6,3] <- curr_p$CUE_x +(curr_p$CUE_x-(curr_p$CUE_x/walk_rt)) # CUE max
     # 
-    # p_rng[7,2] <- iter_out$desorb_x / walk_rt # desorb min
-    # p_rng[7,3] <- iter_out$desorb_x +(iter_out$desorb_x-(iter_out$desorb_x/walk_rt)) # desorb max
+    # p_rng[7,2] <- curr_p$desorb_x / walk_rt # desorb min
+    # p_rng[7,3] <- curr_p$desorb_x +(curr_p$desorb_x-(curr_p$desorb_x/walk_rt)) # desorb max
     # 
-    # p_rng[8,2] <- iter_out$fPHYS_x / walk_rt # fPHYS min
-    # p_rng[8,3] <- iter_out$fPHYS_x +(iter_out$fPHYS_x-(iter_out$fPHYS_x/walk_rt)) # fPHYS max
+    # p_rng[8,2] <- curr_p$fPHYS_x / walk_rt # fPHYS min
+    # p_rng[8,3] <- curr_p$fPHYS_x +(curr_p$fPHYS_x-(curr_p$fPHYS_x/walk_rt)) # fPHYS max
 
     p_rng[9,2] <- curr_p$VMAX_x / walk_rt # VMAX min
     p_rng[9,3] <- curr_p$VMAX_x +(curr_p$VMAX_x-(curr_p$VMAX_x/walk_rt)) # VMAX max
@@ -250,4 +259,45 @@ ggarrange(pCOST, pVMAX, pKM, ncol = 1)
 # Export MCMC run data
 #######################
 #write.csv(MCMC_out, paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs), ".csv"))
+
+
+
+######################
+# Plot best parameter combo from MCMC
+######################
+
+MIMout <- MIMrepeat(forcing_df = ex_data, rparams = curr_p)
+
+# Litter mass
+plot_LIT <- ggplot(MIMout, aes(y=LITs, x=DAY, color="Structural")) + geom_line(size=1) +
+  geom_line(aes(y=LITm, x=DAY, color="Metabolic"), size=1) +
+  theme_bw() +
+  ylab("Litter mass remaining (%)") +
+  xlab("Incubation Time (days)") +
+  labs(color = "Litter Pool")
+
+# SOM & MIC pools
+plot_SOM_MIC <- ggplot(MIMout, aes(SOMc, x=DAY, color="SOMc")) + geom_line(size=1) +
+  geom_line(aes(y=SOMa, x=DAY, color="SOMa"), size=1) +
+  geom_line(aes(y=MICr, x=DAY, color="MIC-r"), size=1) +
+  geom_line(aes(y=MICK, x=DAY, color="MIC-K"), size=1) +
+  theme_bw() +
+  ylab("Microbial and soil C") +
+  xlab("Incubation Time (days)") +
+  labs(color = "C Pool") +
+  ylim(0, 3)
+
+# CO2 fraction
+plot_CO2 <- ggplot(MIMout, aes(y=rowSums(MIMout[,10:11])/rowSums(MIMout[,3:11]),
+                   x=DAY, color="CO2-C")) + geom_line(size=1) +
+  theme_bw() +
+  ylab("CO2 (fraction of initial") +
+  xlab("Incubation Time (days)") +
+  labs(color = "C Pool")
+
+
+# Build a panel plot
+ggarrange(plot_LIT, plot_SOM_MIC, plot_CO2,
+          nrow=3,
+          ncol=1)
 

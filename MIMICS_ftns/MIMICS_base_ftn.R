@@ -171,8 +171,8 @@ MIMICS1 <- function(df){
   I        <- rep(0,2)
   LIT_1    <- 100   
   LIT_2    <- 100
-  MIC_1    <- 0.01
-  MIC_2    <- 0.01
+  MIC_1    <- 0.2 #min start (default) = 0.01
+  MIC_2    <- 0.02 #min start (default) = 0.01
   SOM_1    <- 0
   SOM_2    <- 0
   SOM_3    <- 0
