@@ -39,7 +39,7 @@ MCMC_out <- data.frame(i=0,
                        desorb_x=0.17,
                        fPHYS_x=0.22,
                        slope=0,
-                       r2=0,
+                       r=0,
                        RMSE=3.5,
                        MICpropSOC=0,
                        LITpropSOC=0,
@@ -114,6 +114,7 @@ for(i in 1:MIM_runs) {
     
     
     #Run MIMICS ftn with test parameters
+    #! Need to add failsafe for MIMICS stode failure
     MIMout <- MIMrepeat(forcing_df = data, rparams = test_p)
     
     #log parameter updates in dataframe
@@ -242,16 +243,16 @@ pVint_x <- ggplot(MCMC_out, aes(x=iter, y=Vint_x)) + geom_line(color="grey50", a
 pKslope_x <- ggplot(MCMC_out, aes(x=iter, y=Kslope_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
 pKint_x <- ggplot(MCMC_out, aes(x=iter, y=Kint_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
 
-walk_plot <- grid.arrange(pRMSE, pr2, pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKslope_x, ncol = 2)
+walk_plot <- grid.arrange(pRMSE, pr, pTau_x, pCUE_x, pDesorb_x, pFPHYS_x, pVslope_x, pVint_x, pKslope_x, ncol = 2)
 
 #save plot
-ggsave(file=paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs),"_walk_plot", ".jpeg"), 
-       plot=walk_plot,
-       width=10,
-       height=8)
+# ggsave(file=paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs),"_walk_plot", ".jpeg"), 
+#        plot=walk_plot,
+#        width=10,
+#        height=8)
 
 #######################
 # Export MCMC run data
 #######################
-write.csv(MCMC_out, paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs), ".csv"))
+#write.csv(MCMC_out, paste0("MCMC/Output/", format(Sys.time(), "%Y%m%d_%H%M%S_"), "MIM_MCMC_pCombos-", as.character(MIM_runs), ".csv"))
 

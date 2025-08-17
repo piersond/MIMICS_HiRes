@@ -92,8 +92,8 @@ MIMrepeat <- function(forcing_df, rparams, output_type = "summary") {
     ############################################
     # Collect summary stats from MIMrun
     ############################################
-    # Calculate correlation between field SOC and MIMSOC
-    r2_test <- cor.test(MIMrun$SOC, MIMrun$MIMSOC)
+    # Calculate correlation between field SOC and MIMSOC 
+    r2_test <- cor.test(MIMrun$SOC, MIMrun$MIMSOC)   # Returns r, not r2
     r_val <- round(as.numeric(unlist(r2_test ['estimate'])),3)
     
     #SOC mean & stdev
