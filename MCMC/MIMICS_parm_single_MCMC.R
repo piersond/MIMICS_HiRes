@@ -1,9 +1,8 @@
 
-## Set working drive
-# FYI: Packages are loaded in MIMICS_base_ftn.R
-
 # For local run
 setwd("C:/github/MIMICS_HiRes")
+
+source("MIMICS_ftns/MIMICS_base_ftn.R")
 
 ########################################
 # Load forcing data
@@ -30,23 +29,23 @@ p_rng <- data.frame(Parameter = c("Vslope", "Vint", "Kslope", "Kint", "Tau", "CU
 # Create dataframe to store MCMC steps
 ########################################
 MCMC_out <- data.frame(i=0,
-                     iter=1,
-                     Vslope_x=1,
-                     Vint_x=1,
-                     Kslope_x=1,
-                     Kint_x=1,
-                     Tau_x=1,
-                     CUE_x=1,
-                     desorb_x=0.17,
-                     fPHYS_x=0.22,
-                     slope=0,
-                     r2=0,
-                     RMSE=3.5,
-                     MICpropSOC=0,
-                     LITpropSOC=0,
-                     MIM_CO_Avg=0,
-                     SOMpTOvAvg=0,
-                     improve=1)
+                       iter=1,
+                       Vslope_x=1,
+                       Vint_x=1,
+                       Kslope_x=1,
+                       Kint_x=1,
+                       Tau_x=1,
+                       CUE_x=1,
+                       desorb_x=0.17,
+                       fPHYS_x=0.22,
+                       slope=0,
+                       r2=0,
+                       RMSE=3.5,
+                       MICpropSOC=0,
+                       LITpropSOC=0,
+                       MIM_CO_Avg=0,
+                       SOMpTOvAvg=0,
+                       improve=1)
 
 ########################################
 # ### Allow multi-core use (not sure this is helpful for a loop)
@@ -54,7 +53,7 @@ MCMC_out <- data.frame(i=0,
 ########################################
 
 # Set number of CPU cores to use
-nbr_cores <- detectCores(all.tests = FALSE, logical = TRUE)-1
+nbr_cores <- detectCores(all.tests = FALSE, logical = TRUE)-2
 
 plan(multicore, gc = FALSE, workers = nbr_cores)
 
@@ -83,7 +82,8 @@ curr_cost <- 3.5 #RMSE value to improve upon
 iters_wo_improve = 0
 
 #Set number of iterations for each parameter proposal 
-MIM_runs <- 200
+MIM_runs <- 30 # Number of MCMC iterations to run, each with 8 parameter proposals
+# Min ~20, max ~100, depending on how long you want to run the MCMC
 
 # Send progress statement to console
 print(paste0("Running ", as.character(MIM_runs), " MCMC iterations"))
@@ -97,6 +97,8 @@ for(i in 1:MIM_runs) {
   
   for(j in 1:8) {
     
+    print(paste0("  Trial p", as.character(j), "..."))
+    
     #Set new parameter value
     test_p <- curr_p
     
@@ -109,7 +111,7 @@ for(i in 1:MIM_runs) {
     if(j == 6) {test_p[1,6] <- runif(1, p_rng[6,2], p_rng[6,3])} #CUE 
     if(j == 7) {test_p[1,7] <- runif(1, p_rng[7,2], p_rng[7,3])} #desorb
     if(j == 8) {test_p[1,8] <- runif(1, p_rng[8,2], p_rng[8,3])} #fPHYS
-
+    
     
     #Run MIMICS ftn with test parameters
     MIMout <- MIMrepeat(forcing_df = data, rparams = test_p)
@@ -126,7 +128,7 @@ for(i in 1:MIM_runs) {
                            desorb_x=test_p[7],
                            fPHYS_x=test_p[8],
                            slope=MIMout$slope,
-                           r2=MIMout$r2,
+                           r=MIMout$r,
                            RMSE=MIMout$RMSE,
                            MICpropSOC=MIMout$MICpropSOC,
                            LITpropSOC=MIMout$LITpropSOC,
@@ -144,64 +146,71 @@ for(i in 1:MIM_runs) {
        MIMout$MIM_CO_mn < 100 &&
        MIMout$SOMpTO > 50 &&
        MIMout$SOMpTO < 1000) 
-      {
+    {
       
-        #Update targets
-        curr_p <- test_p
-        curr_cost <- MIMout$RMSE
-        iter_out$improve <- 1
-        iters_wo_improve <- 0
-        
-        # Print to console
-        print(paste0("IMPROVED RMSE TO ", round(MIMout$RMSE,2)))
-        
-        ## Walk proposal distributions 
-        # ONLY USEFUL IF COMPUTATIONAL POWER IS LIMITED, comment out if not
-        #######################################################################
-        # Set walk rate
-        walk_rt = 2 # Set the parameter range min to be the current value divided by
-                      # this number, and the max to the current value multiplied
-                      # by this number
-
-        # New proposal distributions
-        ####################################
-        p_rng[1,2] <- iter_out$Vslope_x / walk_rt # V_slope min
-        p_rng[1,3] <- iter_out$Vslope_x +(iter_out$Vslope_x-(iter_out$Vslope_x/walk_rt)) # V_slope max
-
-        p_rng[2,2] <- iter_out$Vint_x / walk_rt # V_int min
-        p_rng[2,3] <- iter_out$Vint_x +(iter_out$Vint_x-(iter_out$Vint_x/walk_rt)) # V_int max
-
-        p_rng[3,2] <- iter_out$Kslope_x / walk_rt # K_slope min
-        p_rng[3,3] <- iter_out$Kslope_x +(iter_out$Kslope_x-(iter_out$Kslope_x/walk_rt)) # K_slope max
-
-        p_rng[3,2] <- iter_out$Kint_x / walk_rt # K_int min
-        p_rng[3,3] <- iter_out$Kint_x +(iter_out$Kint_x-(iter_out$Kint_x/walk_rt)) # K_int max
-        
-        p_rng[5,2] <- iter_out$Tau_x / walk_rt # Tau min
-        p_rng[5,3] <- iter_out$Tau_x +(iter_out$Tau_x-(iter_out$Tau_x/walk_rt)) # Tau max
-
-        p_rng[6,2] <- iter_out$CUE_x / walk_rt # CUE min
-        p_rng[6,3] <- iter_out$CUE_x +(iter_out$CUE_x-(iter_out$CUE_x/walk_rt)) # CUE max
-
-        p_rng[7,2] <- iter_out$desorb_x / walk_rt # desorb min
-        p_rng[7,3] <- iter_out$desorb_x +(iter_out$desorb_x-(iter_out$desorb_x/walk_rt)) # desorb max
-
-        p_rng[8,2] <- iter_out$fPHYS_x / walk_rt # fPHYS min
-        p_rng[8,3] <- iter_out$fPHYS_x +(iter_out$fPHYS_x-(iter_out$fPHYS_x/walk_rt)) # fPHYS max
-        
+      #Update targets
+      curr_p <- test_p
+      curr_cost <- MIMout$RMSE
+      iter_out$improve <- 1
+      iters_wo_improve <- 0
+      
+      # Print to console
+      print("-----------------------------")
+      print(paste0("IMPROVED RMSE TO ", round(MIMout$RMSE,2)))
+      print(paste0("  slope =  ", round(MIMout$slope,2)))
+      print(paste0("  r =  ", round(MIMout$r,2)))
+      print("-----------------------------")
+      
+      ## Walk proposal distributions 
+      # ONLY USEFUL IF COMPUTATIONAL POWER IS LIMITED, comment out if not
+      #######################################################################
+      # Set walk rate
+      walk_rt = 2 # Set the parameter range min to be the current value divided by
+      # this number, and the max to the current value multiplied
+      # by this number
+      
+      # New proposal distributions
+      ####################################
+      p_rng[1,2] <- iter_out$Vslope_x / walk_rt # V_slope min
+      p_rng[1,3] <- iter_out$Vslope_x +(iter_out$Vslope_x-(iter_out$Vslope_x/walk_rt)) # V_slope max
+      
+      p_rng[2,2] <- iter_out$Vint_x / walk_rt # V_int min
+      p_rng[2,3] <- iter_out$Vint_x +(iter_out$Vint_x-(iter_out$Vint_x/walk_rt)) # V_int max
+      
+      p_rng[3,2] <- iter_out$Kslope_x / walk_rt # K_slope min
+      p_rng[3,3] <- iter_out$Kslope_x +(iter_out$Kslope_x-(iter_out$Kslope_x/walk_rt)) # K_slope max
+      
+      p_rng[3,2] <- iter_out$Kint_x / walk_rt # K_int min
+      p_rng[3,3] <- iter_out$Kint_x +(iter_out$Kint_x-(iter_out$Kint_x/walk_rt)) # K_int max
+      
+      p_rng[5,2] <- iter_out$Tau_x / walk_rt # Tau min
+      p_rng[5,3] <- iter_out$Tau_x +(iter_out$Tau_x-(iter_out$Tau_x/walk_rt)) # Tau max
+      
+      p_rng[6,2] <- iter_out$CUE_x / walk_rt # CUE min
+      p_rng[6,3] <- iter_out$CUE_x +(iter_out$CUE_x-(iter_out$CUE_x/walk_rt)) # CUE max
+      
+      p_rng[7,2] <- iter_out$desorb_x / walk_rt # desorb min
+      p_rng[7,3] <- iter_out$desorb_x +(iter_out$desorb_x-(iter_out$desorb_x/walk_rt)) # desorb max
+      
+      p_rng[8,2] <- iter_out$fPHYS_x / walk_rt # fPHYS min
+      p_rng[8,3] <- iter_out$fPHYS_x +(iter_out$fPHYS_x-(iter_out$fPHYS_x/walk_rt)) # fPHYS max
+      
     } else {
-        #update tracker for number of iterations without improvement
-        iters_wo_improve <- iters_wo_improve + 1
-        
-        # Slowly tighten or expand distributions when, over many iterations,
-        # no RMSE improvement is found
-        #######################################################
-        # Would such a process be an improvement?
-        
-      }
-       
-      # Export MCMC data
-      MCMC_out <- rbind(MCMC_out, iter_out)
+      #update tracker for number of iterations without improvement
+      iters_wo_improve <- iters_wo_improve + 1
+      
+      # Slowly tighten or expand distributions when, over many iterations,
+      # no RMSE improvement is found
+      #######################################################
+      # Would such a process be an improvement?
+      
+      
+      # Exit if fail to improve after n rounds...
+      
+    }
+    
+    # Export MCMC data
+    MCMC_out <- rbind(MCMC_out, iter_out)
     
   }
 }
@@ -217,9 +226,13 @@ nbrOfWorkers()
 #######################
 # Plot MCMC walk
 #######################
+library(ggplot2)
+library(gridExtra)
+library(ggpubr)
 
-pRMSE <- ggplot(MCMC_out, aes(x=iter, y=RMSE)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
-pr2 <- ggplot(MCMC_out, aes(x=iter, y=r2)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
+
+pRMSE <- ggplot(MCMC_out, aes(x=iter, y=RMSE)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + ylim(0, 5) + theme_minimal() +theme(legend.position = "none")
+pr <- ggplot(MCMC_out, aes(x=iter, y=r)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + ylim(0.1, 1) + theme_minimal() +theme(legend.position = "none")
 pTau_x <- ggplot(MCMC_out, aes(x=iter, y=Tau_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
 pCUE_x <-ggplot(MCMC_out, aes(x=iter, y=CUE_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")
 pDesorb_x <- ggplot(MCMC_out, aes(x=iter, y=desorb_x)) + geom_line(color="grey50", alpha=0.5) + geom_point(size=3, color="grey50", alpha=0.5)  + geom_line(data=MCMC_out %>% filter(improve > 0), color="red", size=1) + geom_point(data=MCMC_out %>% filter(improve > 0), color="red", size=4) + theme_minimal() +theme(legend.position = "none")

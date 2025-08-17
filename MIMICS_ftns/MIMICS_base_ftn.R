@@ -3,15 +3,15 @@
 
 #Libraries
 library(rootSolve)
-library(boot)
-library(ggplot2)
-library(tidyverse)
+#library(boot)
+#library(ggplot2)
+library(dplyr) #library(tidyverse)
 library(Metrics) 
 library(parallel)
 library(furrr)
 library(purrr)
-library(grid)
-library(gridExtra)
+#library(grid)
+#library(gridExtra)
 
 #bring in RXEQ function
 source("MIMICS_ftns/RXEQ_ftn.R")
@@ -154,8 +154,10 @@ MIMICS1 <- function(df){
   #print(EST_LIT)# gC/m2/h (from gC/m2/y) then mgC/cm2/h(from gC/m2/h) 
   
   # ------------ caclulate parameters ---------------
-  Vmax     <- exp(TSOI * Vslope + Vint) * aV 
-  Km       <- exp(TSOI * Kslope + Kint) * aK
+  Vmax     <- exp(TSOI * .GlobalEnv$Vslope + .GlobalEnv$Vint) * aV 
+  Km       <- exp(TSOI * .GlobalEnv$Kslope + .GlobalEnv$Kint) * aK
+  
+  #print(Vmax)
   
   #ANPP strongly correlated with MAP
   Tau_MOD1 <- sqrt(ANPP/Tau_MOD[1])         
@@ -164,7 +166,7 @@ MIMICS1 <- function(df){
   Tau_MOD1[Tau_MOD1 > Tau_MOD[3]] <- Tau_MOD[3] 
   tau <- c(tau_r[1]*exp(tau_r[2]*fMET), 
            tau_K[1]*exp(tau_K[2]*fMET))   
-  tau <- tau * Tau_MOD1 * Tau_MOD2 * Tau_MULT 
+  tau <- tau * Tau_MOD1 * Tau_MOD2 * .GlobalEnv$Tau_MULT 
   
   fPHYS    <- c(fPHYS_r[1] * exp(fPHYS_r[2]*fCLAY), 
                 fPHYS_K[1] * exp(fPHYS_K[2]*fCLAY)) 	            
@@ -173,8 +175,8 @@ MIMICS1 <- function(df){
   fAVAI    <- 1 - (fPHYS + fCHEM)
   desorb   <- fSOM_p[1] * exp(fSOM_p[2]*(fCLAY))                  
   
-  desorb <- desorb * desorb_MULT
-  fPHYS <- fPHYS * fPHYS_MULT
+  desorb <- desorb * .GlobalEnv$desorb_MULT
+  fPHYS <- fPHYS * .GlobalEnv$fPHYS_MULT
   
   pSCALAR  <- PHYS_scalar[1] * exp(PHYS_scalar[2]*(sqrt(fCLAY)))  #Scalar for texture effects on SOMp
   v_MOD    <- vMOD  
@@ -202,7 +204,7 @@ MIMICS1 <- function(df){
   OXIDAT  <- rep(NA, dim=1)
   
   #Calculate RXEQ pools  
-  Tpars <- c( I = I, VMAX = VMAX, KM = KM, CUE = CUE, 
+  Tpars <- c( I = I, VMAX = VMAX, KM = KM, CUE = .GlobalEnv$CUE, 
               fPHYS = fPHYS, fCHEM = fCHEM, fAVAI = fAVAI, FI = FI, 
               tau = tau, LITmin = LITmin, SOMmin = SOMmin, MICtrn = MICtrn, 
               desorb = desorb, DEsorb = DEsorb, OXIDAT = OXIDAT, KO = KO)
@@ -225,9 +227,8 @@ MIMICS1 <- function(df){
   .GlobalEnv$DEsorb <- DEsorb
   .GlobalEnv$OXIDAT <- OXIDAT
   
-  
   # Using jitter
-  test  <- stode_jitter(stode_y = Ty, stode_time = 1e6, stode_fun = RXEQ, stode_parms = Tpars, stode_pos = TRUE)
+  test  <- stode_jitter(stode_y = Ty, stode_time = 1e7, stode_fun = RXEQ, stode_parms = Tpars, stode_pos = TRUE)
   
   # Not using jitter
   #test  <- stode(y = Ty, time = 1e6, fun = RXEQ, parms = Tpars, positive = TRUE)
@@ -303,9 +304,9 @@ MIMICS1 <- function(df){
 # ##############################################
 # # Full forcing dataset run
 # ##############################################
-# data <- data <- read.csv("RCrk_Modelling_Data/LTER_SITE_1.csv", as.is=T)
+data <- data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_all_raw.csv", as.is=T)
 # 
-# MIMout_single <- MIMICS1(data[1,])
+MIMout_single <- MIMICS1(data[4,])
 # 
 # MIMrun <- data %>% split(1:nrow(data)) %>% map(~ MIMICS1(df=.)) %>% bind_rows()
 # MIMrun <- data %>% cbind(MIMrun %>% select(-Site, -TSOI))

@@ -80,6 +80,7 @@ MIMrepeat <- function(forcing_df, rparams, output_type = "summary") {
   #add run number
   MIMrun$run_num <- rparams$run_num[1]
   
+  #print(Vslope)
   
   ######################################
   # Selection of output data type
@@ -158,7 +159,7 @@ MIMrepeat <- function(forcing_df, rparams, output_type = "summary") {
     
     MIMOUT <- data.frame(
       #Model fit stats
-      r2 = r_val,
+      r = r_val,
       RMSE = RMSE,
       slope = slope_fit,
       resid_avg = resid_avg,
@@ -237,17 +238,17 @@ MIMrepeat <- function(forcing_df, rparams, output_type = "summary") {
 #####################
 
 # bring in forcing data
-data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
-
-test_params <- data.frame(Vslope_x = 1.5382,
-                          Vint_x = 1.8601,
-                          Kslope_x = 0.8204,
-                          Kint_x = 1.7086,
-                          Tau_x = 0.8446,
-                          CUE_x = 0.9113,
-                          desorb_x = 1.7790,
-                          fPHYS_x = 0.9690,
-                          run_num = 1)
-
-test_output_summary <- MIMrepeat(forcing_df = data, rparams = test_params, output_type = "summary")
-test_output_all <- MIMrepeat(forcing_df = data, rparams = test_params, output_type = "all")
+# data <- read.csv("RCrk_Modelling_Data/RCrk_SOC_calibration.csv", as.is=T)
+# 
+# test_params <- data.frame(Vslope_x = 1.5382,
+#                           Vint_x = 1.8601,
+#                           Kslope_x = 0.8204,
+#                           Kint_x = 1.7086,
+#                           Tau_x = 0.8446,
+#                           CUE_x = 0.9113,
+#                           desorb_x = 1.7790,
+#                           fPHYS_x = 0.9690,
+#                           run_num = 1)
+# 
+# test_output_summary <- MIMrepeat(forcing_df = data, rparams = test_params, output_type = "summary")
+# test_output_all <- MIMrepeat(forcing_df = data, rparams = test_params, output_type = "all")
